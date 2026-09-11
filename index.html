@@ -71,6 +71,35 @@
             100% { opacity: 1; transform: scale(1.6) translateY(0); box-shadow: 0 0 14px #ff4d6d; }
         }
 
+        /* --- رأس كلاود تشيبي العائم بالخلفية --- */
+        .chibi-cloud-bg {
+            position: fixed;
+            top: 80px;
+            right: 40px;
+            width: 110px;
+            height: 110px;
+            z-index: -1;
+            pointer-events: none;
+            filter: drop-shadow(0 0 18px rgba(255, 226, 52, 0.45));
+            animation: chibiFloat 3.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes chibiFloat {
+            0% { transform: translateY(0) rotate(-4deg) scale(1); }
+            50% { transform: translateY(-12px) rotate(4deg) scale(1.05); }
+            100% { transform: translateY(-4px) rotate(-2deg) scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .chibi-cloud-bg {
+                top: 40px;
+                right: 15px;
+                width: 80px;
+                height: 80px;
+                opacity: 0.85;
+            }
+        }
+
         h1.title {
             font-family: 'Fredoka One', 'Fugaz One', cursive;
             color: var(--main-red);
@@ -438,6 +467,45 @@
 
     <div id="stars-container"></div>
 
+    <!-- رأس كلاود سترايف (تشيبي) بالخلفية -->
+    <div class="chibi-cloud-bg" title="Cloud Strife">
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <!-- الشعر الشائك الخلفي الأصفر -->
+            <polygon points="50,15 35,2 30,22 15,8 18,32 4,24 14,48 24,52" fill="#ffd11a" stroke="#d49b00" stroke-width="2"/>
+            <polygon points="50,15 65,2 70,22 85,8 82,32 96,24 86,48 76,52" fill="#ffe234" stroke="#d49b00" stroke-width="2"/>
+            <polygon points="50,10 52,-2 60,12" fill="#fff176" stroke="#d49b00" stroke-width="1.5"/>
+
+            <!-- رأس ووجه تشيبي ناعم -->
+            <rect x="22" y="32" width="56" height="52" rx="26" fill="#ffe0bd" stroke="#5c3826" stroke-width="2"/>
+            
+            <!-- خصلات شعر أمامية منسدلة ومميزة لكلاود -->
+            <polygon points="26,32 36,46 42,32" fill="#ffd11a"/>
+            <polygon points="40,32 48,50 56,32" fill="#ffe234"/>
+            <polygon points="54,32 64,46 72,32" fill="#fff176"/>
+            
+            <!-- عيون ماكو الزرقاء المشعة (Mako Eyes) -->
+            <!-- العين اليسرى -->
+            <ellipse cx="38" cy="56" rx="6.5" ry="8" fill="#00e5ff"/>
+            <ellipse cx="38" cy="56" rx="4.5" ry="6" fill="#0077b6"/>
+            <circle cx="36" cy="53" r="2.5" fill="#ffffff"/>
+            <!-- العين اليمنى -->
+            <ellipse cx="62" cy="56" rx="6.5" ry="8" fill="#00e5ff"/>
+            <ellipse cx="62" cy="56" rx="4.5" ry="6" fill="#0077b6"/>
+            <circle cx="60" cy="53" r="2.5" fill="#ffffff"/>
+
+            <!-- الخدود الوردية بأسلوب تشيبي -->
+            <ellipse cx="28" cy="65" rx="5" ry="2.5" fill="rgba(255, 90, 110, 0.45)"/>
+            <ellipse cx="72" cy="65" rx="5" ry="2.5" fill="rgba(255, 90, 110, 0.45)"/>
+
+            <!-- فم صغير لطيف -->
+            <path d="M 47 68 Q 50 71 53 68" stroke="#7a3e2d" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+            <!-- حافة الياقة السوداء العالية لكلاود سترايف -->
+            <path d="M 32 82 Q 50 90 68 82 L 72 96 Q 50 102 28 96 Z" fill="#1b1c2b" stroke="#000" stroke-width="2"/>
+            <polygon points="34,84 44,79 38,89" fill="#71798e"/>
+        </svg>
+    </div>
+
     <h1 class="title">
         krkr birthday <i class="fa-solid fa-heart title-icon"></i>
     </h1>
@@ -451,7 +519,6 @@
             <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
         </div>
         
-        <!-- زر التخطي (يظهر فقط إذا كانت قد لعبت سابقاً) -->
         <div id="skip-container" class="hidden" style="margin-top: 20px;">
             <button class="btn skip-btn" onclick="skipToPresents()"><i class="fa-solid fa-gift"></i> تخطي مباشر لصندوق الهدايا 🚀</button>
         </div>
