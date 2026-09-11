@@ -27,7 +27,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 110px;
+            justify-content: center;
+            padding-bottom: 70px;
+            box-sizing: border-box;
         }
 
         body::before {
@@ -96,7 +98,6 @@
             background: var(--main-red);
         }
 
-        /* جعل المشغل مرئياً للمتصفح برمجياً لكن مخفي تماماً عن عين المستخدم */
         #youtube-audio-player {
             position: fixed;
             bottom: 0;
@@ -132,8 +133,8 @@
             color: var(--main-red);
             font-size: 3rem;
             text-shadow: 0 0 15px rgba(255, 42, 75, 0.6), 3px 3px 0px #fff;
-            margin-top: 25px;
-            margin-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
             text-align: center;
             display: flex;
             align-items: center;
@@ -168,7 +169,7 @@
             padding: 25px;
             box-shadow: 0 0 25px rgba(255, 42, 75, 0.35);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 0;
             backdrop-filter: blur(6px);
             animation: containerGlow 4s ease-in-out infinite alternate, floatContainer 6s ease-in-out infinite alternate;
             box-sizing: border-box;
@@ -447,6 +448,7 @@
             100% { transform: translateX(-100%); }
         }
 
+        /* --- تذييل الحقوق السفلي والزر السري --- */
         .footer-bar {
             position: fixed;
             bottom: 0;
@@ -493,12 +495,12 @@
 
         .hidden { display: none !important; }
 
+        /* --- ضبط الجوال --- */
         @media (max-width: 600px) {
             body {
                 justify-content: center;
                 min-height: 100dvh;
                 padding-bottom: 75px;
-                box-sizing: border-box;
             }
 
             .music-toggle-btn {
@@ -824,7 +826,6 @@
             } catch(e) {}
         }
 
-        // إطلاق الصوت مع أول تفاعل سواء باللابتوب أو الجوال
         window.addEventListener('load', () => {
             setTimeout(triggerBgmPlay, 1000);
         });
