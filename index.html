@@ -96,6 +96,16 @@
             background: var(--main-red);
         }
 
+        #youtube-audio-player {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         /* --- رأس كلاود تشيبي بالخلفية --- */
         .chibi-cloud-bg {
             position: fixed;
@@ -389,7 +399,6 @@
             margin-bottom: 4px;
         }
 
-        /* --- شريط المعايدات المتحرك --- */
         .marquee-bar {
             position: fixed;
             bottom: 30px;
@@ -435,7 +444,6 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* --- تذييل الحقوق السفلي والزر السري --- */
         .footer-bar {
             position: fixed;
             bottom: 0;
@@ -482,9 +490,6 @@
 
         .hidden { display: none !important; }
 
-        /* ========================================================
-           تنسيق الجوال حصراً (توسيط المربع بدون التأثير على اللابتوب)
-           ======================================================== */
         @media (max-width: 600px) {
             body {
                 justify-content: center;
@@ -596,6 +601,9 @@
 <body>
 
     <div id="stars-container"></div>
+
+    <!-- مشغل يوتيوب بالخلفية -->
+    <div id="youtube-audio-player"></div>
 
     <!-- زر التحكم بالموسيقى -->
     <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
@@ -712,110 +720,128 @@
         <div class="marquee-content" id="marquee-render"></div>
     </div>
 
-    <!-- التذييل السفلي وفيه النجمة للتحكم -->
     <div class="footer-bar">
         <span>made by aseel</span>
         <i class="fa-solid fa-star admin-star" title="لوحة الإدارة" onclick="accessAdminPanel()"></i>
     </div>
 
+    <!-- مشغل YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         const FIREBASE_DB_URL = "https://krkr-42f6d-default-rtdb.firebaseio.com/messages";
         let cachedCloudMessages = [];
 
-        let audioCtx = null;
-        let isMusicMuted = false;
-        let bgmTimeout = null;
+        let ytPlayer = null;
+        let isMusicPlaying = false;
 
-        function getAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('youtube-audio-player', {
+                height: '1',
+                width: '1',
+                videoId: 'glRTRNZ7oMg',
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 'glRTRNZ7oMg',
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': (e) => {
+                        // محاولة التشغيل الفوري التلقائي
+                        try {
+                            e.target.playVideo();
+                            e.target.unMute();
+                            e.target.setVolume(70);
+                            isMusicPlaying = true;
+                        } catch(err) {}
+                    },
+                    'onStateChange': (e) => {
+                        if (e.data === YT.PlayerState.ENDED) {
+                            ytPlayer.playVideo();
+                        }
+                    }
+                }
+            });
         }
 
+        function triggerBgmPlay() {
+            if (ytPlayer && ytPlayer.playVideo && !isMusicPlaying) {
+                try {
+                    ytPlayer.unMute();
+                    ytPlayer.setVolume(70);
+                    ytPlayer.playVideo();
+                    isMusicPlaying = true;
+                    const icon = document.querySelector('#music-btn i');
+                    if (icon) icon.className = 'fa-solid fa-music';
+                } catch(e) {}
+            }
+        }
+
+        function toggleBGM() {
+            if (!ytPlayer || !ytPlayer.playVideo) return;
+            const icon = document.querySelector('#music-btn i');
+            if (isMusicPlaying) {
+                ytPlayer.pauseVideo();
+                isMusicPlaying = false;
+                if (icon) icon.className = 'fa-solid fa-volume-xmark';
+            } else {
+                ytPlayer.unMute();
+                ytPlayer.playVideo();
+                isMusicPlaying = true;
+                if (icon) icon.className = 'fa-solid fa-music';
+            }
+        }
+
+        // تشغيل صوت النقر
+        let clickAudioCtx = null;
         function playClickSound() {
             try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+                if (!clickAudioCtx) {
+                    clickAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (clickAudioCtx.state === 'suspended') {
+                    clickAudioCtx.resume();
+                }
+                const osc = clickAudioCtx.createOscillator();
+                const gain = clickAudioCtx.createGain();
 
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(440, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.05);
+                osc.frequency.setValueAtTime(440, clickAudioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, clickAudioCtx.currentTime + 0.05);
 
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.15, clickAudioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, clickAudioCtx.currentTime + 0.05);
 
                 osc.connect(gain);
-                gain.connect(ctx.destination);
+                gain.connect(clickAudioCtx.destination);
 
                 osc.start();
-                osc.stop(ctx.currentTime + 0.05);
+                osc.stop(clickAudioCtx.currentTime + 0.05);
             } catch(e) {}
         }
+
+        // تفعيل الصوت مباشرة مع أي تفاعل في حال منعه المتصفح بالبداية
+        window.addEventListener('load', () => {
+            setTimeout(triggerBgmPlay, 800);
+        });
 
         document.addEventListener('click', (e) => {
             if (e.target.closest('button, .btn, .option-btn, .control-btn, .gift-box-icon, .admin-star, .music-toggle-btn')) {
                 playClickSound();
             }
-            if (!bgmTimeout && !isMusicMuted) {
-                playHappyBirthdayLoop();
+            if (!isMusicPlaying) {
+                triggerBgmPlay();
             }
-        });
+        }, { passive: true });
 
-        const birthdayNotes = [
-            { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 }, { f: 261.63, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 329.63, d: 0.8 },
-            { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 }, { f: 261.63, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 349.23, d: 0.8 },
-            { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 523.25, d: 0.5 }, { f: 440.00, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 329.63, d: 0.5 }, { f: 293.66, d: 0.6 },
-            { f: 466.16, d: 0.35 }, { f: 466.16, d: 0.25 }, { f: 440.00, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 349.23, d: 1.0 }
-        ];
-
-        function playHappyBirthdayLoop() {
-            if (isMusicMuted) return;
-            const ctx = getAudioContext();
-            let currentTime = ctx.currentTime + 0.1;
-
-            birthdayNotes.forEach(n => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(n.f, currentTime);
-
-                gain.gain.setValueAtTime(0.045, currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, currentTime + n.d - 0.05);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start(currentTime);
-                osc.stop(currentTime + n.d);
-
-                currentTime += n.d + 0.05;
-            });
-
-            const totalDuration = (currentTime - ctx.currentTime) * 1000;
-            bgmTimeout = setTimeout(() => {
-                if (!isMusicMuted) playHappyBirthdayLoop();
-            }, totalDuration + 800);
-        }
-
-        function toggleBGM() {
-            isMusicMuted = !isMusicMuted;
-            const icon = document.querySelector('#music-btn i');
-            if (isMusicMuted) {
-                if (bgmTimeout) clearTimeout(bgmTimeout);
-                bgmTimeout = null;
-                icon.className = 'fa-solid fa-volume-xmark';
-            } else {
-                icon.className = 'fa-solid fa-music';
-                playHappyBirthdayLoop();
+        document.addEventListener('touchstart', () => {
+            if (!isMusicPlaying) {
+                triggerBgmPlay();
             }
-        }
+        }, { once: true, passive: true });
 
+        // خلفية النجوم
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 90; i++) {
             const star = document.createElement('div');
@@ -1272,3 +1298,4 @@
     </script>
 </body>
 </html>
+        
