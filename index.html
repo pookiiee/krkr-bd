@@ -595,12 +595,6 @@
 
     <div id="stars-container"></div>
 
-    <!-- مشغل الصوت المباشر بتكرار لا نهائي -->
-    <audio id="bgm-audio" loop preload="auto">
-        <source src="https://ia801503.us.archive.org/15/items/happy-birthday-music_202409/happy-birthday-music.mp3" type="audio/mpeg">
-        <source src="https://actions.google.com/sounds/v1/holidays/happy_birthday.ogg" type="audio/ogg">
-    </audio>
-
     <!-- زر التحكم بالموسيقى -->
     <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
         <i class="fa-solid fa-music"></i>
@@ -725,67 +719,143 @@
         const FIREBASE_DB_URL = "https://krkr-42f6d-default-rtdb.firebaseio.com/messages";
         let cachedCloudMessages = [];
 
-        const bgm = document.getElementById('bgm-audio');
+        // --- نظام توليد اللحن الكامل المضمون (Web Audio API - Happy Birthday Polka) ---
+        let audioCtx = null;
         let isMusicPlaying = false;
+        let nextNoteTime = 0;
+        let melodyIndex = 0;
+        let bgmTimer = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // نوتات أغنية عيد الميلاد مع الباص الإيقاعي
+        const songMelody = [
+            { note: 261.63, dur: 0.28, bass: 130.81 },
+            { note: 261.63, dur: 0.14, bass: null },
+            { note: 293.66, dur: 0.42, bass: 174.61 },
+            { note: 261.63, dur: 0.42, bass: 130.81 },
+            { note: 349.23, dur: 0.42, bass: 174.61 },
+            { note: 329.63, dur: 0.84, bass: 130.81 },
+
+            { note: 261.63, dur: 0.28, bass: 130.81 },
+            { note: 261.63, dur: 0.14, bass: null },
+            { note: 293.66, dur: 0.42, bass: 196.00 },
+            { note: 261.63, dur: 0.42, bass: 130.81 },
+            { note: 392.00, dur: 0.42, bass: 196.00 },
+            { note: 349.23, dur: 0.84, bass: 174.61 },
+
+            { note: 261.63, dur: 0.28, bass: 130.81 },
+            { note: 261.63, dur: 0.14, bass: null },
+            { note: 523.25, dur: 0.42, bass: 261.63 },
+            { note: 440.00, dur: 0.42, bass: 220.00 },
+            { note: 349.23, dur: 0.42, bass: 174.61 },
+            { note: 329.63, dur: 0.42, bass: 164.81 },
+            { note: 293.66, dur: 0.84, bass: 146.83 },
+
+            { note: 466.16, dur: 0.28, bass: 233.08 },
+            { note: 466.16, dur: 0.14, bass: null },
+            { note: 440.00, dur: 0.42, bass: 220.00 },
+            { note: 349.23, dur: 0.42, bass: 174.61 },
+            { note: 392.00, dur: 0.42, bass: 196.00 },
+            { note: 349.23, dur: 1.10, bass: 174.61 }
+        ];
+
+        function playSynthTone(freq, time, duration, isBass = false) {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = isBass ? 'triangle' : 'sawtooth';
+                osc.frequency.setValueAtTime(freq, time);
+
+                const baseVolume = isBass ? 0.08 : 0.045;
+                gain.gain.setValueAtTime(baseVolume, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration - 0.02);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(time);
+                osc.stop(time + duration);
+            } catch(e) {}
+        }
+
+        function scheduleMusic() {
+            if (!isMusicPlaying) return;
+            const ctx = getAudioContext();
+
+            while (nextNoteTime < ctx.currentTime + 0.3) {
+                const current = songMelody[melodyIndex];
+                playSynthTone(current.note, nextNoteTime, current.dur, false);
+                if (current.bass) {
+                    playSynthTone(current.bass, nextNoteTime, current.dur, true);
+                }
+
+                nextNoteTime += current.dur + 0.06;
+                melodyIndex = (melodyIndex + 1) % songMelody.length;
+            }
+
+            bgmTimer = setTimeout(scheduleMusic, 80);
+        }
 
         function startBGM() {
-            if (!isMusicPlaying && bgm) {
-                bgm.volume = 0.75;
-                bgm.play().then(() => {
-                    isMusicPlaying = true;
-                    const icon = document.querySelector('#music-btn i');
-                    if (icon) icon.className = 'fa-solid fa-music';
-                }).catch(() => {});
-            }
+            if (isMusicPlaying) return;
+            const ctx = getAudioContext();
+            isMusicPlaying = true;
+            melodyIndex = 0;
+            nextNoteTime = ctx.currentTime + 0.05;
+            scheduleMusic();
+
+            const icon = document.querySelector('#music-btn i');
+            if (icon) icon.className = 'fa-solid fa-music';
         }
 
         function toggleBGM() {
-            if (!bgm) return;
             const icon = document.querySelector('#music-btn i');
             if (isMusicPlaying) {
-                bgm.pause();
                 isMusicPlaying = false;
+                clearTimeout(bgmTimer);
                 if (icon) icon.className = 'fa-solid fa-volume-xmark';
             } else {
-                bgm.play().then(() => {
-                    isMusicPlaying = true;
-                    if (icon) icon.className = 'fa-solid fa-music';
-                });
+                startBGM();
             }
         }
 
         // صوت النقر (Web Audio API)
-        let clickAudioCtx = null;
         function playClickSound() {
             try {
-                if (!clickAudioCtx) {
-                    clickAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (clickAudioCtx.state === 'suspended') {
-                    clickAudioCtx.resume();
-                }
-                const osc = clickAudioCtx.createOscillator();
-                const gain = clickAudioCtx.createGain();
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
 
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(440, clickAudioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, clickAudioCtx.currentTime + 0.05);
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.05);
 
-                gain.gain.setValueAtTime(0.15, clickAudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, clickAudioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
 
                 osc.connect(gain);
-                gain.connect(clickAudioCtx.destination);
+                gain.connect(ctx.destination);
 
                 osc.start();
-                osc.stop(clickAudioCtx.currentTime + 0.05);
+                osc.stop(ctx.currentTime + 0.05);
             } catch(e) {}
         }
 
-        // بدء تشغيل الموسيقى فوراً مع أول تفاعل على اللابتوب أو الجوال
-        window.addEventListener('load', () => {
+        // تشغيل النغمة فوراً عند أي نقرة أو لمسة على الشاشة
+        document.addEventListener('pointerdown', () => {
             startBGM();
-        });
+        }, { once: true });
 
         document.addEventListener('click', (e) => {
             if (e.target.closest('button, .btn, .option-btn, .control-btn, .gift-box-icon, .admin-star, .music-toggle-btn')) {
@@ -796,11 +866,7 @@
 
         document.addEventListener('keydown', () => {
             startBGM();
-        }, { once: true, passive: true });
-
-        document.addEventListener('touchstart', () => {
-            startBGM();
-        }, { once: true, passive: true });
+        }, { once: true });
 
         // خلفية النجوم
         const starsContainer = document.getElementById('stars-container');
