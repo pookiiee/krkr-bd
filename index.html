@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>krkr birthday ❤️</title>
-    <!-- استدعاء خط Bubble من Google Fonts -->
+    <title>krkr birthday</title>
+    <!-- استدعاء الخطوط وأيقونات FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Fugaz+One&family=Mada:wght@600;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -28,7 +29,26 @@
             align-items: center;
         }
 
-        /* خلفية النجوم */
+        /* خلفية سحابية ناعمة تحرك بالخلفية */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 42, 75, 0.15), transparent 60%);
+            animation: rotateBg 20s linear infinite;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* خلفية النجوم النابضة */
         #stars-container {
             position: fixed;
             top: 0;
@@ -43,26 +63,61 @@
             position: absolute;
             background-color: #fff;
             border-radius: 50%;
-            animation: twinkle var(--duration) infinite ease-in-out;
+            animation: pulseStar var(--duration) infinite ease-in-out alternate;
         }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px #ff4d6d; }
+        @keyframes pulseStar {
+            0% {
+                opacity: 0.15;
+                transform: scale(0.6) translateY(0);
+                box-shadow: 0 0 0px transparent;
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.2) translateY(-4px);
+                box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.6) translateY(0);
+                box-shadow: 0 0 14px #ff4d6d;
+            }
         }
 
-        /* العنوان الرئيسي */
+        /* العنوان الرئيسي النابض */
         h1.title {
             font-family: 'Fredoka One', 'Fugaz One', cursive;
             color: var(--main-red);
             font-size: 3rem;
             text-shadow: 0 0 15px rgba(255, 42, 75, 0.6), 3px 3px 0px #fff;
-            margin-top: 20px;
+            margin-top: 25px;
             margin-bottom: 10px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            animation: floatHeader 3s ease-in-out infinite alternate;
         }
 
-        /* حاويات الشاشات */
+        @keyframes floatHeader {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-6px) scale(1.02); }
+        }
+
+        .title-icon {
+            color: var(--main-red);
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px rgba(255, 42, 75, 0.8);
+            animation: heartPulse 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.3); color: #ff6b81; }
+        }
+
+        /* الحاويات النابضة بالحياة */
         .container {
             width: 90%;
             max-width: 600px;
@@ -70,10 +125,21 @@
             border: 2px solid var(--main-red);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 0 20px rgba(255, 42, 75, 0.3);
+            box-shadow: 0 0 25px rgba(255, 42, 75, 0.35);
             text-align: center;
             margin-bottom: 30px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(6px);
+            animation: containerGlow 4s ease-in-out infinite alternate, floatContainer 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            0% { box-shadow: 0 0 20px rgba(255, 42, 75, 0.3); border-color: #ff2a4b; }
+            100% { box-shadow: 0 0 35px rgba(255, 77, 109, 0.6); border-color: #ff6b81; }
+        }
+
+        @keyframes floatContainer {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
         }
 
         .btn {
@@ -87,72 +153,110 @@
             margin: 10px;
             font-family: inherit;
             font-weight: bold;
-            transition: 0.2s;
+            transition: 0.25s ease;
             box-shadow: 0 4px 10px rgba(255, 42, 75, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255,255,255,0.25), transparent);
+            transform: rotate(30deg);
+            animation: shineBtn 3s infinite;
+        }
+
+        @keyframes shineBtn {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            20%, 100% { transform: translateX(100%) rotate(30deg); }
         }
 
         .btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-3px) scale(1.05);
             background: #ff4d6d;
+            box-shadow: 0 6px 20px rgba(255, 42, 75, 0.7);
         }
 
-        /* شاشة الاختيار الأولي */
+        /* الأسهم والأزرار */
         .arrows-flex {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 25px;
         }
 
         .arrow-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 15px 20px;
-            font-size: 1.2rem;
+            padding: 14px 22px;
+            font-size: 1.15rem;
         }
 
-        /* خيارات الأسئلة */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
             margin-top: 15px;
         }
 
         .option-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--main-red);
             color: white;
-            padding: 10px;
+            padding: 12px;
             border-radius: 10px;
             cursor: pointer;
             font-size: 1rem;
-            transition: 0.2s;
+            font-family: inherit;
+            transition: 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .option-btn:hover {
             background: var(--main-red);
+            transform: scale(1.04);
+            box-shadow: 0 0 12px rgba(255, 42, 75, 0.5);
         }
 
         .date-input {
-            padding: 10px;
+            padding: 12px;
             font-size: 1.1rem;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid var(--main-red);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
             text-align: center;
             width: 80%;
             margin-bottom: 15px;
+            outline: none;
+            font-family: inherit;
+            transition: 0.3s;
         }
 
-        /* منطقة اللعبة */
+        .date-input:focus {
+            box-shadow: 0 0 15px rgba(255, 42, 75, 0.8);
+            border-color: #ff6b81;
+        }
+
+        /* اللعبة */
         #game-canvas {
             background: #2a080c;
             border: 2px solid var(--main-red);
-            border-radius: 10px;
+            border-radius: 12px;
             display: block;
             margin: 0 auto;
             max-width: 100%;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 42, 75, 0.3);
         }
 
         .controls {
@@ -166,25 +270,46 @@
             background: #ff2a4b;
             color: white;
             border: none;
-            width: 60px;
-            height: 50px;
-            font-size: 1.2rem;
-            border-radius: 10px;
+            width: 65px;
+            height: 55px;
+            font-size: 1.4rem;
+            border-radius: 12px;
             user-select: none;
+            -webkit-user-select: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            transition: 0.15s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
-        /* بوكس الهدايا والرسايل */
-        .gift-box {
-            font-size: 80px;
+        .control-btn:active {
+            background: #ff4d6d;
+            transform: scale(0.90);
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.8);
+        }
+
+        /* الهدايا النابضة بالحياة */
+        .gift-box-icon {
+            font-size: 85px;
+            color: var(--main-red);
             cursor: pointer;
-            animation: bounce 1s infinite alternate;
+            animation: bounceGift 1.2s infinite ease-in-out alternate;
             display: inline-block;
             margin: 20px 0;
+            filter: drop-shadow(0 0 20px rgba(255, 42, 75, 0.9));
+            transition: 0.3s ease;
         }
 
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-15px); }
+        .gift-box-icon:hover {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        @keyframes bounceGift {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-18px) rotate(3deg); }
         }
 
         .messages-list {
@@ -197,14 +322,24 @@
         .message-card {
             background: rgba(255, 255, 255, 0.05);
             border-right: 4px solid var(--main-red);
-            padding: 10px 15px;
+            padding: 12px 15px;
             margin-bottom: 10px;
-            border-radius: 4px;
+            border-radius: 6px;
+            animation: fadeInMsg 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .message-sender {
             color: var(--main-red);
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
         }
 
         .hidden { display: none !important; }
@@ -212,81 +347,87 @@
 </head>
 <body>
 
+    <!-- خلفية النجوم -->
     <div id="stars-container"></div>
 
-    <h1 class="title">krkr birthday ❤️</h1>
+    <!-- العنوان الرئيسي -->
+    <h1 class="title">
+        krkr birthday <i class="fa-solid fa-heart title-icon"></i>
+    </h1>
 
-    <!-- الشاشة الأولى: التهنئة والتوجيه -->
+    <!-- الشاشة 1: التهنئة والتوجيه -->
     <div id="step-intro" class="container">
-        <h2>happy birthday krkr واخيرا تحررتي من القصر! 🎉</h2>
+        <h2>happy birthday krkr واخيرا تحررتي من القصر! <i class="fa-solid fa-crown" style="color: #ffd700;"></i></h2>
         <p>اختاري وجهتك للبدء:</p>
         <div class="arrows-flex">
-            <button class="btn arrow-btn" onclick="goToPookie()">⬅️ pookie</button>
-            <button class="btn arrow-btn" onclick="startVerification()">birthday girl ➡️</button>
+            <button class="btn arrow-btn" onclick="goToPookie()"><i class="fa-solid fa-arrow-left"></i> pookie</button>
+            <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
         </div>
     </div>
 
-    <!-- شاشة الـ Pookies (الأعضاء) -->
+    <!-- الشاشة 2: pookie (رسائل الأصدقاء) -->
     <div id="step-pookie" class="container hidden">
-        <h2>أهلاً بأصدقاء صاحبة العيد! 💌</h2>
+        <h2>أهلاً بأصدقاء صاحبة العيد! <i class="fa-solid fa-envelope-open-text" style="color: var(--main-red);"></i></h2>
         <p>إذا حاب تعايد krkr، تقدر تكتب مباركتك هنا وستظهر لها في صندوق الهدايا!</p>
         <input type="text" id="sender-name" placeholder="اسمك" class="date-input" style="width: 90%;"><br>
-        <textarea id="sender-msg" placeholder="اكتب تهنئتك هنا..." class="date-input" style="width: 90%; height: 80px;"></textarea><br>
-        <button class="btn" onclick="saveMessage()">إرسال المعايدة ❤️</button>
+        <textarea id="sender-msg" placeholder="اكتب تهنئتك هنا..." class="date-input" style="width: 90%; height: 80px; resize: none;"></textarea><br>
+        <button class="btn" onclick="saveMessage()"><i class="fa-solid fa-paper-plane"></i> إرسال المعايدة</button>
         <br><br>
-        <button class="btn" onclick="goBackHome()" style="background: #555;">العودة للرئيسية</button>
+        <button class="btn" onclick="goBackHome()" style="background: #444;"><i class="fa-solid fa-house"></i> العودة للرئيسية</button>
     </div>
 
-    <!-- شاشة التحقق (Captcha) -->
+    <!-- الشاشة 3: اختبار التحقق -->
     <div id="step-captcha" class="container hidden">
-        <h2>اختبار التحقق من صاحبة العيد 🤖❤️</h2>
+        <h2>اختبار التحقق من صاحبة العيد <i class="fa-solid fa-robot" style="color: var(--main-red);"></i></h2>
         <p id="captcha-question">1. أدخلي تاريخ ميلادك المميز (يوم.شهر.سنة):</p>
-        <div id="captcha-content">
-            <!-- يتبدل محتوى الأسئلة عبر JavaScript -->
-        </div>
+        <div id="captcha-content"></div>
     </div>
 
-    <!-- شاشة النجاح واللعبة -->
+    <!-- الشاشة 4: اللعبة -->
     <div id="step-game" class="container hidden">
-        <h2>تهانينا اجتزتي الاختبار! 🥳</h2>
-        <p>ساعدي كلاود بالهروب من "قاصر" للوصول إلى "بالغ +18"!</p>
+        <h2>تهانينا اجتزتي الاختبار! <i class="fa-solid fa-sparkles" style="color: #ffd700;"></i></h2>
+        <p>ساعدي كلاود بالهروب من "قاصر" !</p>
         
         <canvas id="game-canvas" width="500" height="200"></canvas>
         
         <div class="controls">
-            <button class="control-btn" ontouchstart="keys.left=true" ontouchend="keys.left=false" mousedown="keys.left=true" onmouseup="keys.left=false">⬅️</button>
-            <button class="control-btn" onclick="jumpCharacter()">⬆️ نط</button>
-            <button class="control-btn" ontouchstart="keys.right=true" ontouchend="keys.right=false" mousedown="keys.right=true" onmouseup="keys.right=false">➡️</button>
+            <button class="control-btn" id="btn-left"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="control-btn" id="btn-jump"><i class="fa-solid fa-chevron-up"></i></button>
+            <button class="control-btn" id="btn-right"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
     </div>
 
-    <!-- شاشة الهدايا والرسايل -->
+    <!-- الشاشة 5: الهدايا والرسائل -->
     <div id="step-presents" class="container hidden">
-        <h2>مبروك الفوز! ✨🔞</h2>
+        <h2>مبروك الفوز! <i class="fa-solid fa-star" style="color: #ffd700;"></i></h2>
         <p>اضغطي على صندوق الهدايا لفتحه!</p>
-        <div class="gift-box" onclick="openGift()">🎁</div>
+        <div class="gift-box-icon" onclick="openGift()">
+            <i class="fa-solid fa-box-open"></i>
+        </div>
         
         <div id="messages-container" class="messages-list hidden">
-            <h3>رسائل المعايدة من البنات ❤️:</h3>
+            <h3>رسائل المعايدة من البنات <i class="fa-solid fa-heart" style="color: var(--main-red);"></i>:</h3>
             <div id="messages-render"></div>
         </div>
     </div>
 
     <script>
-        // 1. إنشاء خلفية النجوم
+        // 1. خلفية النجوم المجهزة بنبض ديناميكي
         const starsContainer = document.getElementById('stars-container');
-        for (let i = 0; i < 70; i++) {
+        for (let i = 0; i < 90; i++) {
             const star = document.createElement('div');
             star.className = 'star';
-            star.style.width = Math.random() * 3 + 'px';
-            star.style.height = star.style.width;
+            const size = Math.random() * 3.5 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
             star.style.top = Math.random() * 100 + '%';
             star.style.left = Math.random() * 100 + '%';
-            star.style.setProperty('--duration', (Math.random() * 3 + 1) + 's');
+            star.style.setProperty('--duration', (Math.random() * 2 + 1.2) + 's');
+            star.style.animationDelay = (Math.random() * 3) + 's';
             starsContainer.appendChild(star);
         }
 
-        // 2. إدارة الشاشات والتنقل
+        // 2. التنقل
         function showStep(id) {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -295,7 +436,7 @@
         function goBackHome() { showStep('step-intro'); }
         function goToPookie() { showStep('step-pookie'); }
 
-        // 3. رسائل الأعضاء (مخزنة مؤقتاً في LocalStorage)
+        // 3. المعايدات
         function saveMessage() {
             const name = document.getElementById('sender-name').value;
             const msg = document.getElementById('sender-msg').value;
@@ -311,7 +452,7 @@
             goBackHome();
         }
 
-        // 4. نظام اختبار التحقق (Captcha)
+        // 4. Captcha
         let captchaStep = 1;
         function startVerification() {
             captchaStep = 1;
@@ -327,23 +468,38 @@
                 qText.innerText = "1. أدخلي تاريخ ميلادك (مثال: 12.9.2008):";
                 content.innerHTML = `
                     <input type="text" id="date-val" class="date-input" placeholder="12.9.2008"><br>
-                    <button class="btn" onclick="checkDate()">تأكيد</button>
+                    <button class="btn" onclick="checkDate()"><i class="fa-solid fa-check"></i> تأكيد</button>
                 `;
             } else if(captchaStep === 2) {
                 qText.innerText = "2. مين شخصك المفضل؟";
-                content.innerHTML = createOptions(['سوزي', 'تولا', 'وتين', 'كنتلوبا']);
+                content.innerHTML = createOptions([
+                    { name: 'سوزي', icon: 'fa-user-astronaut' },
+                    { name: 'تولا', icon: 'fa-user-ninja' },
+                    { name: 'وتين', icon: 'fa-user-secret' },
+                    { name: 'كنتلوبا', icon: 'fa-ghost' }
+                ], 'سوزي');
             } else if(captchaStep === 3) {
                 qText.innerText = "3. مشروبك المفضل؟";
-                content.innerHTML = createOptions(['ماتشا', 'ريدبول', 'قهوة', 'حليب']);
+                content.innerHTML = createOptions([
+                    { name: 'ماتشا', icon: 'fa-mug-hot' },
+                    { name: 'ريدبول', icon: 'fa-bolt' },
+                    { name: 'قهوة', icon: 'fa-coffee' },
+                    { name: 'حليب', icon: 'fa-glass-water' }
+                ], 'ماتشا');
             } else if(captchaStep === 4) {
                 qText.innerText = "4. لعبتك المفضلة؟";
-                content.innerHTML = createOptions(['ماينكرافت', 'أوفرواتش', 'ليقو', 'توكا بوكا']);
+                content.innerHTML = createOptions([
+                    { name: 'ماينكرافت', icon: 'fa-cube' },
+                    { name: 'اوفروتش', icon: 'fa-gamepad' },
+                    { name: 'ليقو', icon: 'fa-shapes' },
+                    { name: 'توكا بوكا', icon: 'fa-puzzle-piece' }
+                ], 'اوفروتش');
             }
         }
 
-        function createOptions(arr) {
+        function createOptions(arr, correctAns) {
             return `<div class="options-grid">` + 
-                arr.map(opt => `<button class="option-btn" onclick="nextCaptcha()">${opt}</button>`).join('') +
+                arr.map(opt => `<button class="option-btn" onclick="checkOption('${opt.name}', '${correctAns}')"><i class="fa-solid ${opt.icon}"></i> ${opt.name}</button>`).join('') +
                 `</div>`;
         }
 
@@ -352,7 +508,15 @@
             if(val === '12.9.2008') {
                 nextCaptcha();
             } else {
-                alert('التاريخ غير صحيح! تحققي جيدا 😉');
+                alert('التاريخ غير صحيح!');
+            }
+        }
+
+        function checkOption(selected, correct) {
+            if(selected === correct) {
+                nextCaptcha();
+            } else {
+                alert('إجابة خاطئة! حاولي مجدداً');
             }
         }
 
@@ -366,75 +530,100 @@
             }
         }
 
-        // 5. لعبة كلاود سترايف بالشارع
+        // 5. اللعبة مع الحركة والحيوية
         let canvas, ctx;
-        let cloud = { x: 30, y: 130, w: 30, h: 40, dy: 0, grounded: true };
+        let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
-        let finishLine = { x: 1200, reached: false };
+        let finishLine = { x: 1450, reached: false };
         let keys = { left: false, right: false };
         let gameInterval;
+        let breathAnim = 0;
+        let finishPulse = 0;
 
         function initGame() {
             canvas = document.getElementById('game-canvas');
             ctx = canvas.getContext('2d');
             
-            // إضافة 4 عقبات "قاصر"
             obstacles = [
-                { x: 250, y: 140, w: 50, h: 25, passed: false },
-                { x: 500, y: 140, w: 50, h: 25, passed: false },
-                { x: 750, y: 140, w: 50, h: 25, passed: false },
-                { x: 1000, y: 140, w: 50, h: 25, passed: false }
+                { x: 400, y: 140, w: 55, h: 25, speed: 1.5 },
+                { x: 700, y: 140, w: 55, h: 25, speed: 2.0 },
+                { x: 1000, y: 140, w: 55, h: 25, speed: 2.2 },
+                { x: 1250, y: 140, w: 55, h: 25, speed: 2.5 }
             ];
             cloud.x = 30;
-            finishLine.x = 1250;
+            finishLine.x = 1450;
             finishLine.reached = false;
 
-            // تحكم لوحة المفاتيح
+            setupButtonControls();
+
             window.onkeydown = (e) => {
-                if(e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-                if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-                if(e.key === ' ' || e.key === 'ArrowUp') jumpCharacter();
+                if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+                if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+                if(e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') jumpCharacter();
             };
             window.onkeyup = (e) => {
-                if(e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-                if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+                if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+                if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
             };
 
             if(gameInterval) clearInterval(gameInterval);
             gameInterval = setInterval(updateGame, 1000/60);
         }
 
+        function setupButtonControls() {
+            const btnLeft = document.getElementById('btn-left');
+            const btnRight = document.getElementById('btn-right');
+            const btnJump = document.getElementById('btn-jump');
+
+            const startLeft = (e) => { e.preventDefault(); keys.left = true; };
+            const stopLeft = (e) => { e.preventDefault(); keys.left = false; };
+            btnLeft.onmousedown = startLeft;
+            btnLeft.onmouseup = stopLeft;
+            btnLeft.ontouchstart = startLeft;
+            btnLeft.ontouchend = stopLeft;
+
+            const startRight = (e) => { e.preventDefault(); keys.right = true; };
+            const stopRight = (e) => { e.preventDefault(); keys.right = false; };
+            btnRight.onmousedown = startRight;
+            btnRight.onmouseup = stopRight;
+            btnRight.ontouchstart = startRight;
+            btnRight.ontouchend = stopRight;
+
+            const triggerJump = (e) => { e.preventDefault(); jumpCharacter(); };
+            btnJump.onclick = triggerJump;
+            btnJump.ontouchstart = triggerJump;
+        }
+
         function jumpCharacter() {
             if(cloud.grounded) {
-                cloud.dy = -10;
+                cloud.dy = -10.5;
                 cloud.grounded = false;
             }
         }
 
         function updateGame() {
-            // حركة كلاود
-            if(keys.right) cloud.x += 4;
-            if(keys.left && cloud.x > 10) cloud.x -= 4;
+            breathAnim += 0.1;
+            finishPulse += 0.08;
 
-            // جاذبية
+            if(keys.right) cloud.x += 4.5;
+            if(keys.left && cloud.x > 10) cloud.x -= 4.5;
+
             cloud.y += cloud.dy;
-            cloud.dy += 0.5;
+            cloud.dy += 0.55;
 
-            if(cloud.y >= 130) {
-                cloud.y = 130;
+            if(cloud.y >= 120) {
+                cloud.y = 120;
                 cloud.grounded = true;
             }
 
-            // فحص الاصطدام مع "قاصر"
             obstacles.forEach(obs => {
+                obs.x -= obs.speed;
                 if(cloud.x < obs.x + obs.w && cloud.x + cloud.w > obs.x &&
                    cloud.y < obs.y + obs.h && cloud.y + cloud.h > obs.y) {
-                    // إرجاع كلاود للخلف عند الاصطدام
-                    cloud.x = Math.max(10, cloud.x - 40);
+                    cloud.x = Math.max(10, cloud.x - 50);
                 }
             });
 
-            // خط النهاية (+18 بالغ)
             if(cloud.x >= finishLine.x && !finishLine.reached) {
                 finishLine.reached = true;
                 clearInterval(gameInterval);
@@ -447,64 +636,83 @@
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // الكاميرا تتبع كلاود
             ctx.save();
             let cameraX = Math.max(0, cloud.x - 100);
             ctx.translate(-cameraX, 0);
 
-            // الشارع والخطوط
-            ctx.fillStyle = '#444';
-            ctx.fillRect(0, 170, 2000, 30);
+            // الشارع مع خطوط متقطعة متحركة
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, 168, 2500, 32);
             ctx.fillStyle = '#fff';
-            for(let i=0; i<2000; i+=60) { ctx.fillRect(i, 183, 30, 4); }
+            for(let i=0; i<2500; i+=60) { ctx.fillRect(i, 182, 30, 4); }
 
-            // رسم كلاود (Chibi Cloud)
-            ctx.fillStyle = '#ffcc99'; // وجه
-            ctx.fillRect(cloud.x + 5, cloud.y, 20, 15);
-            ctx.fillStyle = '#ffe600'; // الشعر الأشقر
-            ctx.fillRect(cloud.x + 3, cloud.y - 8, 24, 10);
-            ctx.fillStyle = '#223355'; // الملابس
-            ctx.fillRect(cloud.x + 5, cloud.y + 15, 20, 25);
-            ctx.fillStyle = '#888'; // السيف بظهر كلاود
-            ctx.fillRect(cloud.x - 2, cloud.y + 5, 5, 30);
+            // تنفس وحركة كلاود سترايف
+            let breathOffsetY = Math.sin(breathAnim) * 2;
 
-            // رسم عقبات "قاصر"
-            ctx.fillStyle = '#ff2a4b';
+            // كلاود (FF7 Chibi)
+            ctx.fillStyle = '#7a8a9e';
+            ctx.fillRect(cloud.x - 6, cloud.y + 5 + breathOffsetY, 8, 38);
+            ctx.fillStyle = '#b0c4de';
+            ctx.fillRect(cloud.x - 8, cloud.y + 20 + breathOffsetY, 12, 4);
+            
+            ctx.fillStyle = '#1c2436';
+            ctx.fillRect(cloud.x + 6, cloud.y + 18 + breathOffsetY, 20, 22);
+
+            ctx.fillStyle = '#8a9ba8';
+            ctx.fillRect(cloud.x + 2, cloud.y + 18 + breathOffsetY, 6, 8);
+
+            ctx.fillStyle = '#ffdfc4';
+            ctx.fillRect(cloud.x + 6, cloud.y + 6 + breathOffsetY, 20, 14);
+            ctx.fillStyle = '#00d2ff';
+            ctx.fillRect(cloud.x + 18, cloud.y + 10 + breathOffsetY, 4, 4);
+
+            // الشعر الأصفر الناري
+            ctx.fillStyle = '#ffe234';
+            ctx.beginPath();
+            ctx.moveTo(cloud.x + 4, cloud.y + 8 + breathOffsetY);
+            ctx.lineTo(cloud.x - 2, cloud.y - 2 + breathOffsetY);
+            ctx.lineTo(cloud.x + 10, cloud.y + 4 + breathOffsetY);
+            ctx.lineTo(cloud.x + 14, cloud.y - 8 + breathOffsetY);
+            ctx.lineTo(cloud.x + 20, cloud.y + 4 + breathOffsetY);
+            ctx.lineTo(cloud.x + 28, cloud.y - 4 + breathOffsetY);
+            ctx.lineTo(cloud.x + 28, cloud.y + 10 + breathOffsetY);
+            ctx.fill();
+
+            // عقبات "قاصر" مع حركة هزة بسيطة
             ctx.font = 'bold 16px Mada';
-            obstacles.forEach(obs => {
-                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-                ctx.fillStyle = '#fff';
-                ctx.fillText('قاصر', obs.x + 8, obs.y + 18);
+            obstacles.forEach((obs, index) => {
+                let obsFloat = Math.sin(breathAnim + index) * 2;
                 ctx.fillStyle = '#ff2a4b';
+                ctx.fillRect(obs.x, obs.y + obsFloat, obs.w, obs.h);
+                ctx.fillStyle = '#fff';
+                ctx.fillText('قاصر', obs.x + 10, obs.y + 18 + obsFloat);
             });
 
-            // رسم خط النهاية (بالغ +18)
+            // خط النهاية المضيء النابض
+            let glow = Math.abs(Math.sin(finishPulse)) * 10;
+            ctx.shadowBlur = 15 + glow;
+            ctx.shadowColor = '#00ff88';
             ctx.fillStyle = '#00ff88';
-            ctx.fillRect(finishLine.x, 70, 10, 100);
+            ctx.fillRect(finishLine.x, 60, 8, 110);
+            ctx.shadowBlur = 0;
+
             ctx.fillStyle = '#fff';
-            ctx.font = 'bold 22px Fredoka One, Mada';
-            ctx.fillText('+18 بالغ', finishLine.x - 20, 60);
+            ctx.font = 'bold 20px Fredoka One, Mada';
+            ctx.fillText('+18 بالغ', finishLine.x - 25, 50 + Math.sin(finishPulse)*3);
 
             ctx.restore();
         }
 
-        // 6. الفوز وإظهار قصاصات الورق للهدايا
+        // 6. الهدايا والاحتفال
         function winGame() {
-            confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.6 }
-            });
-            setTimeout(() => {
-                showStep('step-presents');
-            }, 1000);
+            confetti({ particleCount: 180, spread: 90, origin: { y: 0.6 } });
+            setTimeout(() => { showStep('step-presents'); }, 1000);
         }
 
         function openGift() {
-            confetti({ particleCount: 100, spread: 100 });
+            confetti({ particleCount: 120, spread: 100 });
             document.getElementById('messages-container').classList.remove('hidden');
             
-            // جلب الرسايل الافتراضية ورسايل الأعضاء
             let defaultMsgs = [
                 { name: "سوزي", msg: "كل عام وانتتتتي بخير يا احلى krkr ❤️✨" },
                 { name: "تولا", msg: "واخيراً تحررتي من القصر ورسماً كبرتي!! HBD 🥳" },
@@ -517,7 +725,7 @@
             const renderBox = document.getElementById('messages-render');
             renderBox.innerHTML = allMsgs.map(m => `
                 <div class="message-card">
-                    <div class="message-sender">${m.name}</div>
+                    <div class="message-sender"><i class="fa-solid fa-user-tag"></i> ${m.name}</div>
                     <div>${m.msg}</div>
                 </div>
             `).join('');
