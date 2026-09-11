@@ -76,7 +76,7 @@
             position: fixed;
             top: 15px;
             left: 15px;
-            background: rgba(255, 42, 75, 0.2);
+            background: rgba(255, 42, 75, 0.25);
             border: 1px solid var(--main-red);
             color: #fff;
             width: 42px;
@@ -99,50 +99,41 @@
         /* --- رأس كلاود تشيبي بالخلفية --- */
         .chibi-cloud-bg {
             position: fixed;
-            top: 80px;
-            right: 40px;
-            width: 110px;
-            height: 110px;
+            top: 70px;
+            right: 25px;
+            width: 100px;
+            height: 100px;
             z-index: -1;
             pointer-events: none;
-            filter: drop-shadow(0 0 18px rgba(255, 226, 52, 0.45));
+            filter: drop-shadow(0 0 16px rgba(255, 226, 52, 0.45));
             animation: chibiFloat 3.5s ease-in-out infinite alternate;
         }
 
         @keyframes chibiFloat {
             0% { transform: translateY(0) rotate(-4deg) scale(1); }
-            50% { transform: translateY(-12px) rotate(4deg) scale(1.05); }
-            100% { transform: translateY(-4px) rotate(-2deg) scale(1); }
-        }
-
-        @media (max-width: 768px) {
-            .chibi-cloud-bg {
-                top: 40px;
-                right: 15px;
-                width: 80px;
-                height: 80px;
-                opacity: 0.85;
-            }
+            50% { transform: translateY(-10px) rotate(4deg) scale(1.05); }
+            100% { transform: translateY(-3px) rotate(-2deg) scale(1); }
         }
 
         h1.title {
             font-family: 'Fredoka One', 'Fugaz One', cursive;
             color: var(--main-red);
-            font-size: 3rem;
+            font-size: 2.8rem;
             text-shadow: 0 0 15px rgba(255, 42, 75, 0.6), 3px 3px 0px #fff;
             margin-top: 25px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
             animation: floatHeader 3s ease-in-out infinite alternate;
+            padding: 0 10px;
         }
 
         @keyframes floatHeader {
             0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-6px) scale(1.02); }
+            100% { transform: translateY(-5px) scale(1.02); }
         }
 
         .title-icon {
@@ -158,17 +149,18 @@
         }
 
         .container {
-            width: 90%;
-            max-width: 600px;
+            width: 92%;
+            max-width: 580px;
             background: var(--card-bg);
             border: 2px solid var(--main-red);
             border-radius: 20px;
-            padding: 25px;
+            padding: 24px 20px;
             box-shadow: 0 0 25px rgba(255, 42, 75, 0.35);
             text-align: center;
             margin-bottom: 30px;
             backdrop-filter: blur(6px);
             animation: containerGlow 4s ease-in-out infinite alternate, floatContainer 6s ease-in-out infinite alternate;
+            box-sizing: border-box;
         }
 
         @keyframes containerGlow {
@@ -178,18 +170,18 @@
 
         @keyframes floatContainer {
             0% { transform: translateY(0); }
-            100% { transform: translateY(-8px); }
+            100% { transform: translateY(-6px); }
         }
 
         .btn {
             background: var(--main-red);
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 1.1rem;
+            padding: 12px 22px;
+            font-size: 1.05rem;
             border-radius: 12px;
             cursor: pointer;
-            margin: 10px;
+            margin: 8px;
             font-family: inherit;
             font-weight: bold;
             transition: 0.25s ease;
@@ -200,6 +192,7 @@
             gap: 8px;
             position: relative;
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .btn::after {
@@ -220,16 +213,16 @@
         }
 
         .btn:hover {
-            transform: translateY(-3px) scale(1.05);
+            transform: translateY(-2px) scale(1.03);
             background: #ff4d6d;
-            box-shadow: 0 6px 20px rgba(255, 42, 75, 0.7);
+            box-shadow: 0 6px 18px rgba(255, 42, 75, 0.7);
         }
 
         .skip-btn {
             background: #28a745;
             border: 1px solid #28a745;
             box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
-            width: 80%;
+            width: 90%;
             max-width: 320px;
         }
 
@@ -240,23 +233,26 @@
 
         .arrows-flex {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin-top: 25px;
-            flex-wrap: wrap;
-            gap: 10px;
+            margin-top: 20px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .arrow-btn {
-            padding: 14px 22px;
-            font-size: 1.15rem;
+            padding: 13px 18px;
+            font-size: 1.05rem;
             flex: 1;
+            max-width: 220px;
+            white-space: nowrap;
         }
 
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             margin-top: 15px;
         }
 
@@ -267,9 +263,9 @@
             padding: 12px;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-family: inherit;
-            transition: 0.3s ease;
+            transition: 0.25s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -278,24 +274,25 @@
 
         .option-btn:hover {
             background: var(--main-red);
-            transform: scale(1.04);
+            transform: scale(1.03);
             box-shadow: 0 0 12px rgba(255, 42, 75, 0.5);
         }
 
         .date-input {
-            padding: 12px;
-            font-size: 1.1rem;
+            padding: 11px;
+            font-size: 1rem;
             border-radius: 10px;
             border: 1px solid var(--main-red);
             background: rgba(0, 0, 0, 0.5);
             color: #fff;
             text-align: center;
-            width: 80%;
+            width: 85%;
             margin-bottom: 15px;
             outline: none;
             font-family: inherit;
             transition: 0.3s;
             color-scheme: dark;
+            box-sizing: border-box;
         }
 
         .date-input:focus {
@@ -310,6 +307,7 @@
             display: block;
             margin: 0 auto;
             max-width: 100%;
+            height: auto;
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 42, 75, 0.3);
         }
 
@@ -317,16 +315,16 @@
             margin-top: 15px;
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .control-btn {
             background: #ff2a4b;
             color: white;
             border: none;
-            width: 65px;
-            height: 55px;
-            font-size: 1.4rem;
+            width: 60px;
+            height: 52px;
+            font-size: 1.3rem;
             border-radius: 12px;
             user-select: none;
             -webkit-user-select: none;
@@ -346,43 +344,43 @@
         }
 
         .gift-box-icon {
-            font-size: 85px;
+            font-size: 80px;
             color: var(--main-red);
             cursor: pointer;
             animation: bounceGift 1.2s infinite ease-in-out alternate;
             display: inline-block;
-            margin: 20px 0;
+            margin: 15px 0;
             filter: drop-shadow(0 0 20px rgba(255, 42, 75, 0.9));
             transition: 0.3s ease;
         }
 
         .gift-box-icon:hover {
-            transform: scale(1.15) rotate(5deg);
+            transform: scale(1.1) rotate(4deg);
         }
 
         @keyframes bounceGift {
             0% { transform: translateY(0) rotate(-3deg); }
-            100% { transform: translateY(-18px) rotate(3deg); }
+            100% { transform: translateY(-15px) rotate(3deg); }
         }
 
         .messages-list {
             text-align: right;
-            max-height: 300px;
+            max-height: 280px;
             overflow-y: auto;
-            padding-right: 10px;
+            padding-right: 8px;
         }
 
         .message-card {
             background: rgba(255, 255, 255, 0.05);
             border-right: 4px solid var(--main-red);
-            padding: 12px 15px;
+            padding: 12px 14px;
             margin-bottom: 10px;
             border-radius: 6px;
             animation: fadeInMsg 0.5s ease-out forwards;
         }
 
         @keyframes fadeInMsg {
-            from { opacity: 0; transform: translateX(20px); }
+            from { opacity: 0; transform: translateX(15px); }
             to { opacity: 1; transform: translateX(0); }
         }
 
@@ -395,7 +393,6 @@
             margin-bottom: 4px;
         }
 
-        /* --- شريط المعايدات المتحرك --- */
         .marquee-bar {
             position: fixed;
             bottom: 30px;
@@ -422,8 +419,8 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin: 0 25px;
-            font-size: 1.05rem;
+            margin: 0 18px;
+            font-size: 0.95rem;
             color: #fff;
             background: rgba(255, 42, 75, 0.15);
             padding: 5px 14px;
@@ -441,7 +438,6 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* --- تذييل الحقوق السفلي والزر السري --- */
         .footer-bar {
             position: fixed;
             bottom: 0;
@@ -487,42 +483,139 @@
         }
 
         .hidden { display: none !important; }
+
+        /* ========================================================
+           تنسيقات الشاشات الصغيرة والجوال (Responsive Mobile CSS)
+           ======================================================== */
+        @media (max-width: 600px) {
+            body {
+                padding-bottom: 95px;
+            }
+
+            .music-toggle-btn {
+                top: 10px;
+                left: 10px;
+                width: 38px;
+                height: 38px;
+                font-size: 0.9rem;
+            }
+
+            .chibi-cloud-bg {
+                top: 10px;
+                right: 10px;
+                width: 58px;
+                height: 58px;
+                opacity: 0.85;
+            }
+
+            h1.title {
+                font-size: 1.85rem;
+                margin-top: 20px;
+                margin-bottom: 8px;
+                gap: 8px;
+            }
+
+            .title-icon {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                width: 94%;
+                padding: 18px 14px;
+                border-radius: 16px;
+                margin-bottom: 20px;
+            }
+
+            .container h2 {
+                font-size: 1.25rem;
+                margin-top: 4px;
+                margin-bottom: 10px;
+                line-height: 1.4;
+            }
+
+            .container p {
+                font-size: 0.95rem !important;
+                line-height: 1.55;
+            }
+
+            .arrows-flex {
+                flex-direction: row;
+                gap: 8px;
+                margin-top: 15px;
+            }
+
+            .arrow-btn {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+                margin: 0;
+            }
+
+            .skip-btn {
+                width: 100%;
+                font-size: 0.95rem;
+                padding: 10px 16px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .option-btn {
+                padding: 10px 8px;
+                font-size: 0.88rem;
+            }
+
+            .date-input {
+                width: 100%;
+                padding: 10px;
+                font-size: 0.92rem;
+            }
+
+            .control-btn {
+                width: 55px;
+                height: 48px;
+                font-size: 1.15rem;
+            }
+
+            .marquee-bar {
+                padding: 6px 0;
+            }
+
+            .marquee-item {
+                font-size: 0.88rem;
+                margin: 0 12px;
+                padding: 4px 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div id="stars-container"></div>
 
-    <!-- زر التحكم بالموسيقى -->
     <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
         <i class="fa-solid fa-music"></i>
     </div>
 
-    <!-- رأس كلاود سترايف (تشيبي) بالخلفية -->
     <div class="chibi-cloud-bg" title="Cloud Strife">
         <svg viewBox="0 0 100 100" width="100%" height="100%">
             <polygon points="50,15 35,2 30,22 15,8 18,32 4,24 14,48 24,52" fill="#ffd11a" stroke="#d49b00" stroke-width="2"/>
             <polygon points="50,15 65,2 70,22 85,8 82,32 96,24 86,48 76,52" fill="#ffe234" stroke="#d49b00" stroke-width="2"/>
             <polygon points="50,10 52,-2 60,12" fill="#fff176" stroke="#d49b00" stroke-width="1.5"/>
-
             <rect x="22" y="32" width="56" height="52" rx="26" fill="#ffe0bd" stroke="#5c3826" stroke-width="2"/>
-            
             <polygon points="26,32 36,46 42,32" fill="#ffd11a"/>
             <polygon points="40,32 48,50 56,32" fill="#ffe234"/>
             <polygon points="54,32 64,46 72,32" fill="#fff176"/>
-            
             <ellipse cx="38" cy="56" rx="6.5" ry="8" fill="#00e5ff"/>
             <ellipse cx="38" cy="56" rx="4.5" ry="6" fill="#0077b6"/>
             <circle cx="36" cy="53" r="2.5" fill="#ffffff"/>
             <ellipse cx="62" cy="56" rx="6.5" ry="8" fill="#00e5ff"/>
             <ellipse cx="62" cy="56" rx="4.5" ry="6" fill="#0077b6"/>
             <circle cx="60" cy="53" r="2.5" fill="#ffffff"/>
-
             <ellipse cx="28" cy="65" rx="5" ry="2.5" fill="rgba(255, 90, 110, 0.45)"/>
             <ellipse cx="72" cy="65" rx="5" ry="2.5" fill="rgba(255, 90, 110, 0.45)"/>
-
             <path d="M 47 68 Q 50 71 53 68" stroke="#7a3e2d" stroke-width="2" fill="none" stroke-linecap="round"/>
-
             <path d="M 32 82 Q 50 90 68 82 L 72 96 Q 50 102 28 96 Z" fill="#1b1c2b" stroke="#000" stroke-width="2"/>
             <polygon points="34,84 44,79 38,89" fill="#71798e"/>
         </svg>
@@ -544,7 +637,7 @@
             <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
         </div>
         
-        <div id="skip-container" class="hidden" style="margin-top: 20px;">
+        <div id="skip-container" class="hidden" style="margin-top: 18px;">
             <button class="btn skip-btn" onclick="skipToPresents()"><i class="fa-solid fa-gift"></i> تخطي مباشر لصندوق الهدايا 🚀</button>
         </div>
     </div>
@@ -553,14 +646,14 @@
     <div id="step-pookie" class="container hidden">
         <h2>أهلاً بأصدقاء صاحبة العيد! <i class="fa-solid fa-envelope-open-text" style="color: var(--main-red);"></i></h2>
         <p>إذا حاب تعايد krkr، تقدر تكتب مباركتك هنا وستظهر لها في صندوق الهدايا وشريط التهنئة!</p>
-        <input type="text" id="sender-name" placeholder="اسمك" class="date-input" style="width: 90%;"><br>
-        <textarea id="sender-msg" placeholder="اكتب تهنئتك هنا..." class="date-input" style="width: 90%; height: 80px; resize: none;"></textarea><br>
+        <input type="text" id="sender-name" placeholder="اسمك" class="date-input"><br>
+        <textarea id="sender-msg" placeholder="اكتب تهنئتك هنا..." class="date-input" style="height: 80px; resize: none;"></textarea><br>
         <button class="btn" id="btn-submit-msg" onclick="saveMessage()"><i class="fa-solid fa-paper-plane"></i> إرسال المعايدة</button>
         <br><br>
         <button class="btn" onclick="goBackHome()" style="background: #444;"><i class="fa-solid fa-house"></i> العودة للرئيسية</button>
     </div>
 
-    <!-- الشاشة 3: Captcha (التقويم) -->
+    <!-- الشاشة 3: Captcha -->
     <div id="step-captcha" class="container hidden">
         <h2>اختبار التحقق من صاحبة العيد <i class="fa-solid fa-robot" style="color: var(--main-red);"></i></h2>
         <p id="captcha-question">1. اختاري تاريخ ميلادك المميز من التقويم:</p>
@@ -614,18 +707,15 @@
         <div class="marquee-content" id="marquee-render"></div>
     </div>
 
-    <!-- التذييل السفلي وفيه النجمة للتحكم -->
     <div class="footer-bar">
         <span>made by aseel</span>
         <i class="fa-solid fa-star admin-star" title="لوحة الإدارة" onclick="accessAdminPanel()"></i>
     </div>
 
     <script>
-        // --- رابط قاعدة بيانات Firebase ---
         const FIREBASE_DB_URL = "https://krkr-42f6d-default-rtdb.firebaseio.com/messages";
         let cachedCloudMessages = [];
 
-        // --- نظام الصوتيات (Web Audio API) ---
         let audioCtx = null;
         let isMusicMuted = false;
         let bgmTimeout = null;
@@ -670,7 +760,6 @@
             }
         });
 
-        // نغمة ميلاد بالخلفية
         const birthdayNotes = [
             { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 }, { f: 261.63, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 329.63, d: 0.8 },
             { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 }, { f: 261.63, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 349.23, d: 0.8 },
@@ -721,7 +810,6 @@
             }
         }
 
-        // 1. توليد النجوم الخلفية
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 90; i++) {
             const star = document.createElement('div');
@@ -736,12 +824,10 @@
             starsContainer.appendChild(star);
         }
 
-        // 2. التحميل الأولي وجلب الرسائل السحابية
         window.onload = function() {
             checkPlayedStatus();
             fetchCloudMessages();
-            // تحديث دوري كل 8 ثوانٍ لضمان وصول الرسائل الجديدة فوراً
-            setInterval(fetchCloudMessages, 8000);
+            setInterval(fetchCloudMessages, 6000);
         };
 
         function checkPlayedStatus() {
@@ -759,7 +845,6 @@
             openGift();
         }
 
-        // 3. التحكم بالشاشات
         function showStep(id) {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -772,15 +857,26 @@
         }
         function goToPookie() { showStep('step-pookie'); }
 
-        // 4. دوال التعامل مع Firebase السحابية
         async function fetchCloudMessages() {
             try {
                 const res = await fetch(`${FIREBASE_DB_URL}.json`);
                 const data = await res.json();
                 cachedCloudMessages = [];
-                if(data) {
-                    for(const key in data) {
-                        cachedCloudMessages.push({ id: key, ...data[key] });
+                if (data) {
+                    for (const key in data) {
+                        const item = data[key];
+                        if (!item) continue;
+                        
+                        const nameVal = item.name || item.sender || item.user || '';
+                        const msgVal = item.msg || item.message || item.text || '';
+
+                        if (nameVal || msgVal) {
+                            cachedCloudMessages.push({
+                                id: key,
+                                name: nameVal || 'مجهول',
+                                msg: msgVal || ''
+                            });
+                        }
                     }
                 }
                 updateMarquee();
@@ -802,7 +898,11 @@
                 await fetch(`${FIREBASE_DB_URL}.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, msg, timestamp: Date.now() })
+                    body: JSON.stringify({ 
+                        name: name, 
+                        msg: msg, 
+                        timestamp: Date.now() 
+                    })
                 });
 
                 alert('تم إرسال تهنئتك وحفظها في السحابة بنجاح! ✨');
@@ -818,7 +918,6 @@
             }
         }
 
-        // 5. تحديث شريط المعايدات السفلي
         function updateMarquee() {
             const marqueeRender = document.getElementById('marquee-render');
             
@@ -835,7 +934,6 @@
             `).join('');
         }
 
-        // 6. اختبار التحقق
         let captchaStep = 1;
         function startVerification() {
             captchaStep = 1;
@@ -913,7 +1011,6 @@
             }
         }
 
-        // 7. تشغيل اللعبة
         let canvas, ctx;
         let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
@@ -1081,14 +1178,12 @@
             ctx.restore();
         }
 
-        // 8. الفوز باللعبة
         function winGame() {
             localStorage.setItem('krkr_played', 'true');
             confetti({ particleCount: 180, spread: 90, origin: { y: 0.6 } });
             setTimeout(() => { showStep('step-presents'); }, 1000);
         }
 
-        // فتح الصندوق وعرض الرسائل السحابية
         async function openGift() {
             confetti({ particleCount: 120, spread: 100 });
             document.getElementById('messages-container').classList.remove('hidden');
@@ -1109,7 +1204,6 @@
             `).join('');
         }
 
-        // 9. لوحة الإدارة السحابية المحمية بكلمة مرور
         async function accessAdminPanel() {
             const pass = prompt('أدخلي رمز الدخول لوضع الإدارة:');
             if(pass === '654654as') {
