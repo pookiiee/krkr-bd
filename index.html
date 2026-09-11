@@ -73,31 +73,6 @@
             100% { opacity: 1; transform: scale(1.6) translateY(0); box-shadow: 0 0 14px #ff4d6d; }
         }
 
-        /* --- زر التحكم بالموسيقى --- */
-        .music-toggle-btn {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            background: rgba(255, 42, 75, 0.25);
-            border: 1px solid var(--main-red);
-            color: #fff;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1002;
-            box-shadow: 0 0 10px rgba(255, 42, 75, 0.4);
-            transition: 0.3s;
-        }
-
-        .music-toggle-btn:hover {
-            transform: scale(1.1);
-            background: var(--main-red);
-        }
-
         /* --- رأس كلاود تشيبي بالخلفية --- */
         .chibi-cloud-bg {
             position: fixed;
@@ -491,14 +466,6 @@
                 padding-bottom: 75px;
             }
 
-            .music-toggle-btn {
-                top: 12px;
-                left: 12px;
-                width: 36px;
-                height: 36px;
-                font-size: 0.85rem;
-            }
-
             .chibi-cloud-bg {
                 top: 10px;
                 right: 12px;
@@ -594,11 +561,6 @@
 <body>
 
     <div id="stars-container"></div>
-
-    <!-- زر التحكم بالموسيقى -->
-    <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
-        <i class="fa-solid fa-music"></i>
-    </div>
 
     <!-- رأس كلاود سترايف (تشيبي) بالخلفية -->
     <div class="chibi-cloud-bg" title="Cloud Strife">
@@ -731,7 +693,7 @@
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 masterGain = audioCtx.createGain();
-                masterGain.gain.setValueAtTime(1.85, audioCtx.currentTime); // تضخيم الصوت الأساسي
+                masterGain.gain.setValueAtTime(2.2, audioCtx.currentTime); // تضخيم الصوت الأساسي
                 masterGain.connect(audioCtx.destination);
             }
             if (audioCtx.state === 'suspended') {
@@ -780,8 +742,7 @@
                 osc.type = isBass ? 'triangle' : 'sawtooth';
                 osc.frequency.setValueAtTime(freq, time);
 
-                // رفع الفوليوم بشكل واضح ومريح للأذن
-                const vol = isBass ? 0.32 : 0.24;
+                const vol = isBass ? 0.35 : 0.28;
                 gain.gain.setValueAtTime(vol, time);
                 gain.gain.exponentialRampToValueAtTime(0.001, time + duration - 0.02);
 
@@ -821,20 +782,6 @@
             melodyIndex = 0;
             nextNoteTime = ctx.currentTime + 0.05;
             scheduleMusic();
-
-            const icon = document.querySelector('#music-btn i');
-            if (icon) icon.className = 'fa-solid fa-music';
-        }
-
-        function toggleBGM() {
-            const icon = document.querySelector('#music-btn i');
-            if (isMusicPlaying) {
-                isMusicPlaying = false;
-                clearTimeout(bgmTimer);
-                if (icon) icon.className = 'fa-solid fa-volume-xmark';
-            } else {
-                startBGM();
-            }
         }
 
         // صوت النقر (Web Audio API)
@@ -859,12 +806,12 @@
             } catch(e) {}
         }
 
-        // تشغيل النغمة دايركت فور فتح الصفحة عبر المحاولة المباشرة والمراقبة التلقائية
+        // تشغيل مباشر فور تحميل الصفحة
         window.addEventListener('load', () => {
             startBGM();
         });
 
-        // تشغيل فوري مع أي لمسة أو نقرة للشاشة في حال كان المتصفح يمنع الصوت المباشر
+        // تشغيل تلقائي فوري مع أي لمسة أو نقرة للشاشة
         const triggerEvents = ['click', 'touchstart', 'pointerdown', 'keydown', 'scroll'];
         triggerEvents.forEach(evt => {
             window.addEventListener(evt, () => {
@@ -875,7 +822,7 @@
         });
 
         document.addEventListener('click', (e) => {
-            if (e.target.closest('button, .btn, .option-btn, .control-btn, .gift-box-icon, .admin-star, .music-toggle-btn')) {
+            if (e.target.closest('button, .btn, .option-btn, .control-btn, .gift-box-icon, .admin-star')) {
                 playClickSound();
             }
         }, { passive: true });
