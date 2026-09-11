@@ -324,7 +324,6 @@
             margin-bottom: 10px;
             border-radius: 6px;
             animation: fadeInMsg 0.5s ease-out forwards;
-            position: relative;
         }
 
         @keyframes fadeInMsg {
@@ -445,13 +444,15 @@
 
     <!-- الشاشة 1: الرئيسية -->
     <div id="step-intro" class="container">
-<h2>واخيرا تحررتي من القصر! <i class="fa-solid fa-crown" style="color: #ffd700;"></i></h2>        <p>اختاري وجهتك للبدء:</p>
+        <h2>واخيرا تحررتي من القصر! <i class="fa-solid fa-crown" style="color: #ffd700;"></i></h2>
+        <p>اختاري وجهتك للبدء:</p>
         <div class="arrows-flex">
             <button class="btn arrow-btn" onclick="goToPookie()"><i class="fa-solid fa-arrow-left"></i> pookie</button>
             <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
         </div>
         
-        <div style="margin-top: 20px;">
+        <!-- زر التخطي (يظهر فقط إذا كانت قد لعبت سابقاً) -->
+        <div id="skip-container" class="hidden" style="margin-top: 20px;">
             <button class="btn skip-btn" onclick="skipToPresents()"><i class="fa-solid fa-gift"></i> تخطي مباشر لصندوق الهدايا 🚀</button>
         </div>
     </div>
@@ -507,11 +508,13 @@
     <!-- الشاشة 6: لوحة الإدارة المحمية بكلمة مرور -->
     <div id="step-admin" class="container hidden">
         <h2 style="color: #ffd700;"><i class="fa-solid fa-shield-halved"></i> لوحة التحكم (aseel)</h2>
-        <p>إدارة الرسائل وحذف الرسائل غير المرغوبة:</p>
+        <p>إدارة الرسائل وإعادة ضبط حالة اللعب:</p>
         <div id="admin-messages-render" class="messages-list" style="margin-bottom: 15px;"></div>
         <button class="btn" onclick="adminClearAll()" style="background: #a00;"><i class="fa-solid fa-trash-can"></i> حذف كافة الرسائل دفعة واحدة</button>
         <br>
-        <button class="btn" onclick="goBackHome()" style="background: #444; margin-top: 10px;"><i class="fa-solid fa-arrow-right"></i> خروج من لوحة التحكم</button>
+        <button class="btn" onclick="adminResetPlayedStatus()" style="background: #d97706;"><i class="fa-solid fa-rotate-right"></i> تصفير حالة اللعب (إعادة اللعبة كأنها جديدة)</button>
+        <br>
+        <button class="btn" onclick="goBackHome()" style="background: #444; margin-top: 15px;"><i class="fa-solid fa-arrow-right"></i> خروج من لوحة التحكم</button>
     </div>
 
     <!-- شريط المعايدات المتحرك -->
@@ -543,8 +546,18 @@
 
         // 2. التحميل الأولي
         window.onload = function() {
+            checkPlayedStatus();
             updateMarquee();
         };
+
+        function checkPlayedStatus() {
+            const skipContainer = document.getElementById('skip-container');
+            if(localStorage.getItem('krkr_played') === 'true') {
+                skipContainer.classList.remove('hidden');
+            } else {
+                skipContainer.classList.add('hidden');
+            }
+        }
 
         function skipToPresents() {
             if(gameInterval) clearInterval(gameInterval);
@@ -560,6 +573,7 @@
 
         function goBackHome() { 
             if(gameInterval) clearInterval(gameInterval);
+            checkPlayedStatus();
             showStep('step-intro'); 
         }
         function goToPookie() { showStep('step-pookie'); }
@@ -851,11 +865,12 @@
 
         // 9. الفوز باللعبة
         function winGame() {
+            localStorage.setItem('krkr_played', 'true');
             confetti({ particleCount: 180, spread: 90, origin: { y: 0.6 } });
             setTimeout(() => { showStep('step-presents'); }, 1000);
         }
 
-        // فتح الصندوق وعرض الرسائل (للمستخدم العادي بدون أزرار مسح)
+        // فتح الصندوق وعرض الرسائل
         function openGift() {
             confetti({ particleCount: 120, spread: 100 });
             document.getElementById('messages-container').classList.remove('hidden');
@@ -921,6 +936,12 @@
                 renderAdminMessages();
                 updateMarquee();
             }
+        }
+
+        function adminResetPlayedStatus() {
+            localStorage.removeItem('krkr_played');
+            checkPlayedStatus();
+            alert('تم تصفير حالة اللعب بنجاح! الآن ستظهر اللعبة كأنها لأول مرة وسيختفي زر التخطي.');
         }
     </script>
 </body>
