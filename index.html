@@ -78,7 +78,7 @@
             position: fixed;
             top: 15px;
             left: 15px;
-            background: rgba(255, 42, 75, 0.2);
+            background: rgba(255, 42, 75, 0.25);
             border: 1px solid var(--main-red);
             color: #fff;
             width: 42px;
@@ -96,17 +96,6 @@
         .music-toggle-btn:hover {
             transform: scale(1.1);
             background: var(--main-red);
-        }
-
-        #youtube-audio-player {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 200px;
-            height: 200px;
-            opacity: 0.001;
-            pointer-events: none;
-            z-index: -10;
         }
 
         /* --- رأس كلاود تشيبي بالخلفية --- */
@@ -495,7 +484,6 @@
 
         .hidden { display: none !important; }
 
-        /* --- ضبط الجوال --- */
         @media (max-width: 600px) {
             body {
                 justify-content: center;
@@ -607,8 +595,11 @@
 
     <div id="stars-container"></div>
 
-    <!-- مشغل يوتيوب بالخلفية -->
-    <div id="youtube-audio-player"></div>
+    <!-- مشغل الصوت المباشر بتكرار لا نهائي -->
+    <audio id="bgm-audio" loop preload="auto">
+        <source src="https://ia801503.us.archive.org/15/items/happy-birthday-music_202409/happy-birthday-music.mp3" type="audio/mpeg">
+        <source src="https://actions.google.com/sounds/v1/holidays/happy_birthday.ogg" type="audio/ogg">
+    </audio>
 
     <!-- زر التحكم بالموسيقى -->
     <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
@@ -730,75 +721,40 @@
         <i class="fa-solid fa-star admin-star" title="لوحة الإدارة" onclick="accessAdminPanel()"></i>
     </div>
 
-    <!-- مشغل YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         const FIREBASE_DB_URL = "https://krkr-42f6d-default-rtdb.firebaseio.com/messages";
         let cachedCloudMessages = [];
 
-        let ytPlayer = null;
+        const bgm = document.getElementById('bgm-audio');
         let isMusicPlaying = false;
 
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('youtube-audio-player', {
-                height: '200',
-                width: '200',
-                videoId: 'glRTRNZ7oMg',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'loop': 1,
-                    'playlist': 'glRTRNZ7oMg',
-                    'playsinline': 1,
-                    'origin': window.location.origin
-                },
-                events: {
-                    'onReady': (e) => {
-                        try {
-                            e.target.unMute();
-                            e.target.setVolume(80);
-                            e.target.playVideo();
-                            isMusicPlaying = true;
-                        } catch(err) {}
-                    },
-                    'onStateChange': (e) => {
-                        if (e.data === YT.PlayerState.ENDED) {
-                            ytPlayer.playVideo();
-                        }
-                    }
-                }
-            });
-        }
-
-        function triggerBgmPlay() {
-            if (ytPlayer && ytPlayer.playVideo) {
-                try {
-                    ytPlayer.unMute();
-                    ytPlayer.setVolume(80);
-                    ytPlayer.playVideo();
+        function startBGM() {
+            if (!isMusicPlaying && bgm) {
+                bgm.volume = 0.75;
+                bgm.play().then(() => {
                     isMusicPlaying = true;
                     const icon = document.querySelector('#music-btn i');
                     if (icon) icon.className = 'fa-solid fa-music';
-                } catch(e) {}
+                }).catch(() => {});
             }
         }
 
         function toggleBGM() {
-            if (!ytPlayer || !ytPlayer.playVideo) return;
+            if (!bgm) return;
             const icon = document.querySelector('#music-btn i');
             if (isMusicPlaying) {
-                ytPlayer.pauseVideo();
+                bgm.pause();
                 isMusicPlaying = false;
                 if (icon) icon.className = 'fa-solid fa-volume-xmark';
             } else {
-                ytPlayer.unMute();
-                ytPlayer.playVideo();
-                isMusicPlaying = true;
-                if (icon) icon.className = 'fa-solid fa-music';
+                bgm.play().then(() => {
+                    isMusicPlaying = true;
+                    if (icon) icon.className = 'fa-solid fa-music';
+                });
             }
         }
 
-        // تشغيل صوت النقر
+        // صوت النقر (Web Audio API)
         let clickAudioCtx = null;
         function playClickSound() {
             try {
@@ -826,29 +782,24 @@
             } catch(e) {}
         }
 
+        // بدء تشغيل الموسيقى فوراً مع أول تفاعل على اللابتوب أو الجوال
         window.addEventListener('load', () => {
-            setTimeout(triggerBgmPlay, 1000);
+            startBGM();
         });
 
         document.addEventListener('click', (e) => {
             if (e.target.closest('button, .btn, .option-btn, .control-btn, .gift-box-icon, .admin-star, .music-toggle-btn')) {
                 playClickSound();
             }
-            if (!isMusicPlaying) {
-                triggerBgmPlay();
-            }
+            startBGM();
         }, { passive: true });
 
         document.addEventListener('keydown', () => {
-            if (!isMusicPlaying) {
-                triggerBgmPlay();
-            }
+            startBGM();
         }, { once: true, passive: true });
 
         document.addEventListener('touchstart', () => {
-            if (!isMusicPlaying) {
-                triggerBgmPlay();
-            }
+            startBGM();
         }, { once: true, passive: true });
 
         // خلفية النجوم
