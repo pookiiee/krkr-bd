@@ -504,7 +504,10 @@
     <!-- الشاشة 1: الرئيسية -->
     <div id="step-intro" class="container">
         <h2>واخيرا تحررتي من القصر! <i class="fa-solid fa-crown" style="color: #ffd700;"></i></h2>
-        <p>اختاري وجهتك للبدء:</p>
+        <p style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 8px;">
+            إذا كنتِ <strong>عضوة</strong> توجهي إلى <span style="color: var(--main-red); font-weight: bold;">pookie</span> لكتابة تهنئتك ومعايدتك! ✨<br>
+            أما إذا كنتِ <strong>صاحبة العيد krkr</strong> فاضغطي على <span style="color: var(--main-red); font-weight: bold;">birthday girl</span> للبدء 🎉
+        </p>
         <div class="arrows-flex">
             <button class="btn arrow-btn" onclick="goToPookie()"><i class="fa-solid fa-arrow-left"></i> pookie</button>
             <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
@@ -754,7 +757,7 @@
             }
         }
 
-        // 8. تشغيل اللعبة (تمت إعادة رسمة كلاود الأصلية السابقة تماماً)
+        // 8. تشغيل اللعبة
         let canvas, ctx;
         let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
@@ -873,7 +876,7 @@
 
             let breathOffsetY = Math.sin(breathAnim) * 2;
 
-            // رسمة كلاود السابقة البسيطة الأصلية
+            // رسمة كلاود
             ctx.fillStyle = '#7a8a9e';
             ctx.fillRect(cloud.x - 6, cloud.y + 5 + breathOffsetY, 8, 38);
             ctx.fillStyle = '#b0c4de';
