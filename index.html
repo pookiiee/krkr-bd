@@ -71,7 +71,7 @@
             100% { opacity: 1; transform: scale(1.6) translateY(0); box-shadow: 0 0 14px #ff4d6d; }
         }
 
-        /* --- رأس كلاود تشيبي العائم بالخلفية --- */
+        /* --- رأس كلاود تشيبي بالخلفية --- */
         .chibi-cloud-bg {
             position: fixed;
             top: 80px;
@@ -754,9 +754,9 @@
             }
         }
 
-        // 8. تشغيل اللعبة
+        // 8. تشغيل اللعبة (تمت إعادة رسمة كلاود الأصلية السابقة تماماً)
         let canvas, ctx;
-        let cloud = { x: 30, y: 92, w: 45, h: 76, dy: 0, grounded: true, runAnim: 0 };
+        let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
         let finishLine = { x: 1450, reached: false };
         let keys = { left: false, right: false };
@@ -775,8 +775,7 @@
                 { x: 1250, y: 140, w: 55, h: 25, speed: 2.5 }
             ];
             cloud.x = 30;
-            cloud.y = 92;
-            cloud.runAnim = 0;
+            cloud.y = 120;
             finishLine.x = 1450;
             finishLine.reached = false;
 
@@ -822,36 +821,30 @@
 
         function jumpCharacter() {
             if(cloud.grounded) {
-                cloud.dy = -11;
+                cloud.dy = -10.5;
                 cloud.grounded = false;
             }
         }
 
         function updateGame() {
-            breathAnim += 0.08;
+            breathAnim += 0.1;
             finishPulse += 0.08;
 
-            let isRunning = false;
-            if(keys.right) { cloud.x += 4.5; isRunning = true; }
-            if(keys.left && cloud.x > 10) { cloud.x -= 4.5; isRunning = true; }
-
-            if(isRunning) { cloud.runAnim += 0.35; } else { cloud.runAnim = 0; }
+            if(keys.right) cloud.x += 4.5;
+            if(keys.left && cloud.x > 10) cloud.x -= 4.5;
 
             cloud.y += cloud.dy;
             cloud.dy += 0.55;
 
-            if(cloud.y >= 92) {
-                cloud.y = 92;
-                cloud.dy = 0;
+            if(cloud.y >= 120) {
+                cloud.y = 120;
                 cloud.grounded = true;
             }
 
             obstacles.forEach(obs => {
                 obs.x -= obs.speed;
-                let hx = cloud.x + 8;
-                let hy = cloud.y + 6;
-                if(hx < obs.x + obs.w && hx + 35 > obs.x &&
-                   hy < obs.y + obs.h && hy + 70 > obs.y) {
+                if(cloud.x < obs.x + obs.w && cloud.x + cloud.w > obs.x &&
+                   cloud.y < obs.y + obs.h && cloud.y + cloud.h > obs.y) {
                     cloud.x = Math.max(10, cloud.x - 50);
                 }
             });
@@ -865,176 +858,6 @@
             drawGame();
         }
 
-        // رسم شخصية كلاود مطابقاً للرسمة الأصلية بنسبها وأزيائها وسيفها
-        function drawOriginalArtCloud(x, y, breath) {
-            let cx = x + 16;
-            let cy = y + breath;
-            let legSwing = Math.sin(cloud.runAnim) * 8;
-
-            // 1. سيف باستر العملاق المائل بالخلف (Buster Sword Art)
-            ctx.save();
-            ctx.translate(cx + 8, cy + 18);
-            ctx.rotate(0.58); // نفس زاوية السيف المائل في الصورة
-
-            // مقبض السيف اليدوي الأحمر المائل للخمري مع نهايته الفضية
-            ctx.fillStyle = '#6b1c1c';
-            ctx.fillRect(-22, -3.5, 24, 7);
-            ctx.fillStyle = '#b0bec5';
-            ctx.beginPath(); ctx.arc(-22, 0, 4.5, 0, Math.PI*2); ctx.fill();
-
-            // واقي القبضة الذهبي/البرونزي (Crossguard)
-            ctx.fillStyle = '#bfa15f';
-            ctx.fillRect(2, -8, 7, 16);
-
-            // نصل السيف الحديدي العريض والمحدد
-            ctx.fillStyle = '#4a525d'; // الجزء الغامق المشطوب
-            ctx.fillRect(9, -7, 62, 14);
-            ctx.fillStyle = '#9aa7b4'; // الحافة الحادة العلوية اللامعة
-            ctx.fillRect(9, -7, 62, 4);
-
-            // شفرة رأس السيف المشطوفة (Tip)
-            ctx.fillStyle = '#4a525d';
-            ctx.beginPath();
-            ctx.moveTo(71, -7);
-            ctx.lineTo(84, 0);
-            ctx.lineTo(71, 7);
-            ctx.closePath();
-            ctx.fill();
-
-            // فتحتا الماتيريا الأيقونية داخل النصل
-            ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.arc(22, 0, 2.5, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(32, 0, 2.5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#00f2ff'; ctx.beginPath(); ctx.arc(22, 0, 1.3, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(32, 0, 1.3, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-
-            // 2. الساقين والبنطال الفضفاض (Baggy SOLDIER Trousers)
-            ctx.fillStyle = '#1e2029'; // كحلي غامق مسود
-            // الرجل اليسرى
-            ctx.beginPath();
-            ctx.ellipse(cx - 3 - legSwing*0.5, cy + 50, 7, 13, -0.1, 0, Math.PI*2);
-            ctx.fill();
-            // الرجل اليمنى
-            ctx.beginPath();
-            ctx.ellipse(cx + 10 + legSwing*0.5, cy + 50, 7, 13, 0.1, 0, Math.PI*2);
-            ctx.fill();
-
-            // أحذية كلاود الجلدية البنية العالية وأطرافها (Combat Boots)
-            ctx.fillStyle = '#4a2f1c';
-            ctx.fillRect(cx - 8 - legSwing*0.5, cy + 62, 10, 14);
-            ctx.fillRect(cx + 6 + legSwing*0.5, cy + 62, 10, 14);
-            // حافة نعل الحذاء العريض
-            ctx.fillStyle = '#26170d';
-            ctx.fillRect(cx - 10 - legSwing*0.5, cy + 73, 13, 3);
-            ctx.fillRect(cx + 4 + legSwing*0.5, cy + 73, 13, 3);
-
-            // 3. الجذع: السترة المضلعة بدون أكمام وحزام الكتف (SOLDIER Ribbed Knit)
-            ctx.fillStyle = '#282d3c';
-            ctx.fillRect(cx, cy + 24, 15, 17);
-
-            // أشرطة الصدر الجلدية (Leather Harness)
-            ctx.fillStyle = '#543622';
-            ctx.fillRect(cx + 2, cy + 25, 3.5, 15);
-            ctx.fillRect(cx + 9, cy + 25, 3.5, 15);
-
-            // الحزام الجلدي البني العريض وبكلة SOLDIER الفضية المستديرة
-            ctx.fillStyle = '#422818';
-            ctx.fillRect(cx - 1, cy + 38, 17, 6);
-            ctx.fillStyle = '#c7d1db';
-            ctx.beginPath(); ctx.arc(cx + 7, cy + 41, 3.2, 0, Math.PI*2); ctx.fill();
-
-            // 4. الذراع اليسرى المرفوعة الممسكة بالسيف (Left Arm holding hilt)
-            ctx.fillStyle = '#ffd1b3'; // لون البشرة
-            ctx.beginPath();
-            ctx.moveTo(cx - 3, cy + 24);
-            ctx.lineTo(cx - 11, cy + 18);
-            ctx.lineTo(cx - 7, cy + 13);
-            ctx.lineTo(cx + 1, cy + 20);
-            ctx.fill();
-            // قفاز اليد اليسرى مع السوار الحديدي
-            ctx.fillStyle = '#2b1c13';
-            ctx.fillRect(cx - 12, cy + 11, 7, 7);
-            ctx.fillStyle = '#9aa7b4';
-            ctx.fillRect(cx - 10, cy + 16, 5, 3);
-
-            // درع الكتف الأيسر الحديدي مع المسامير (Bolt Pauldron)
-            ctx.fillStyle = '#343a46';
-            ctx.beginPath(); ctx.arc(cx + 1, cy + 23, 6, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#9eabb8';
-            ctx.fillRect(cx - 1, cy + 21, 2, 2);
-            ctx.fillRect(cx + 2, cy + 21, 2, 2);
-
-            // 5. الذراع اليمنى الممتدة للأسفل مع قفاز الأربطة البيضاء وسوار المسامير (Spiked Gauntlet)
-            ctx.fillStyle = '#ffd1b3';
-            ctx.fillRect(cx + 14, cy + 26, 4.5, 10);
-            // أربطة المعصم البيضاء والحديدية الشهيرة
-            ctx.fillStyle = '#e8e8e8';
-            ctx.fillRect(cx + 13, cy + 34, 6.5, 4);
-            ctx.fillStyle = '#4a5360';
-            ctx.fillRect(cx + 13, cy + 37, 7, 6);
-            // مسامير السوار المعدنية البارزة
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(cx + 12, cy + 38, 2, 1.5);
-            ctx.fillRect(cx + 12, cy + 41, 2, 1.5);
-            // القفاز البني
-            ctx.fillStyle = '#2b1c13';
-            ctx.fillRect(cx + 13.5, cy + 43, 6, 6);
-
-            // 6. الرقبة والوجه (Anime Face & Mako Eyes)
-            ctx.fillStyle = '#ffd1b3';
-            ctx.fillRect(cx + 4, cy + 19, 5, 6);
-            ctx.beginPath();
-            ctx.moveTo(cx + 1, cy + 11);
-            ctx.lineTo(cx + 12, cy + 11);
-            ctx.lineTo(cx + 8.5, cy + 21);
-            ctx.closePath();
-            ctx.fill();
-
-            // عيون ماكو الزرقاء المشعة المميزة
-            ctx.fillStyle = '#00f7ff';
-            ctx.shadowBlur = 4; ctx.shadowColor = '#00f7ff';
-            ctx.fillRect(cx + 8, cy + 13.5, 3.5, 3);
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#003366';
-            ctx.fillRect(cx + 9.5, cy + 14, 1.8, 2.5);
-
-            // 7. تسريحة شعر كلاود الأصلية متعددة الشوك والطبقات (Super Spiky Iconic Hair)
-            ctx.fillStyle = '#e6b800'; // تظليل الشعر العميق
-            ctx.beginPath();
-            ctx.moveTo(cx - 3, cy + 14);
-            ctx.lineTo(cx - 10, cy + 1);   // شوكة يسار خلفية
-            ctx.lineTo(cx - 2, cy + 4);
-            ctx.lineTo(cx - 8, cy - 8);   // شوكة عليا بارزة يسار
-            ctx.lineTo(cx + 2, cy - 3);
-            ctx.lineTo(cx + 4, cy - 17);  // الشوكة الطويلة الرئيسية للأعلى
-            ctx.lineTo(cx + 10, cy - 6);
-            ctx.lineTo(cx + 18, cy - 13); // شوكة يمين عليا
-            ctx.lineTo(cx + 14, cy + 3);
-            ctx.lineTo(cx + 22, cy - 2);  // شوكة يمين مائلة للأمام
-            ctx.lineTo(cx + 13, cy + 10);
-            ctx.closePath();
-            ctx.fill();
-
-            // خصلات الشعر الأمامية الذهبية اللامعة الساقطة على الجبين
-            ctx.fillStyle = '#ffea6c';
-            ctx.beginPath();
-            ctx.moveTo(cx + 1, cy + 5);
-            ctx.lineTo(cx + 4, cy - 14);
-            ctx.lineTo(cx + 8, cy + 3);
-            ctx.lineTo(cx + 6, cy + 15); // خصلة متدلية فوق الوجه كالصورة
-            ctx.lineTo(cx + 2, cy + 8);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = '#fff4a3';
-            ctx.beginPath();
-            ctx.moveTo(cx + 4, cy - 14);
-            ctx.lineTo(cx + 6, cy - 6);
-            ctx.lineTo(cx + 4, cy - 2);
-            ctx.fill();
-        }
-
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1042,16 +865,41 @@
             let cameraX = Math.max(0, cloud.x - 100);
             ctx.translate(-cameraX, 0);
 
-            // خطوط الشارع والأرضية
+            // الأرضية
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 168, 2500, 32);
             ctx.fillStyle = '#fff';
             for(let i=0; i<2500; i+=60) { ctx.fillRect(i, 182, 30, 4); }
 
-            let breathOffsetY = Math.sin(breathAnim) * 1.5;
+            let breathOffsetY = Math.sin(breathAnim) * 2;
 
-            // رسم كلاود سترايف بنفس وضعية وملامح الصورة
-            drawOriginalArtCloud(cloud.x, cloud.y, breathOffsetY);
+            // رسمة كلاود السابقة البسيطة الأصلية
+            ctx.fillStyle = '#7a8a9e';
+            ctx.fillRect(cloud.x - 6, cloud.y + 5 + breathOffsetY, 8, 38);
+            ctx.fillStyle = '#b0c4de';
+            ctx.fillRect(cloud.x - 8, cloud.y + 20 + breathOffsetY, 12, 4);
+            
+            ctx.fillStyle = '#1c2436';
+            ctx.fillRect(cloud.x + 6, cloud.y + 18 + breathOffsetY, 20, 22);
+
+            ctx.fillStyle = '#8a9ba8';
+            ctx.fillRect(cloud.x + 2, cloud.y + 18 + breathOffsetY, 6, 8);
+
+            ctx.fillStyle = '#ffdfc4';
+            ctx.fillRect(cloud.x + 6, cloud.y + 6 + breathOffsetY, 20, 14);
+            ctx.fillStyle = '#00d2ff';
+            ctx.fillRect(cloud.x + 18, cloud.y + 10 + breathOffsetY, 4, 4);
+
+            ctx.fillStyle = '#ffe234';
+            ctx.beginPath();
+            ctx.moveTo(cloud.x + 4, cloud.y + 8 + breathOffsetY);
+            ctx.lineTo(cloud.x - 2, cloud.y - 2 + breathOffsetY);
+            ctx.lineTo(cloud.x + 10, cloud.y + 4 + breathOffsetY);
+            ctx.lineTo(cloud.x + 14, cloud.y - 8 + breathOffsetY);
+            ctx.lineTo(cloud.x + 20, cloud.y + 4 + breathOffsetY);
+            ctx.lineTo(cloud.x + 28, cloud.y - 4 + breathOffsetY);
+            ctx.lineTo(cloud.x + 28, cloud.y + 10 + breathOffsetY);
+            ctx.fill();
 
             // العقبات (قاصر)
             ctx.font = 'bold 16px Mada';
