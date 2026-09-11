@@ -493,7 +493,7 @@
 
     <div id="stars-container"></div>
 
-    <!-- زر التحكم بتشغيل/إيقاف الموسيقى -->
+    <!-- زر التحكم بالموسيقى -->
     <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
         <i class="fa-solid fa-music"></i>
     </div>
@@ -555,12 +555,12 @@
         <p>إذا حاب تعايد krkr، تقدر تكتب مباركتك هنا وستظهر لها في صندوق الهدايا وشريط التهنئة!</p>
         <input type="text" id="sender-name" placeholder="اسمك" class="date-input" style="width: 90%;"><br>
         <textarea id="sender-msg" placeholder="اكتب تهنئتك هنا..." class="date-input" style="width: 90%; height: 80px; resize: none;"></textarea><br>
-        <button class="btn" onclick="saveMessage()"><i class="fa-solid fa-paper-plane"></i> إرسال المعايدة</button>
+        <button class="btn" id="btn-submit-msg" onclick="saveMessage()"><i class="fa-solid fa-paper-plane"></i> إرسال المعايدة</button>
         <br><br>
         <button class="btn" onclick="goBackHome()" style="background: #444;"><i class="fa-solid fa-house"></i> العودة للرئيسية</button>
     </div>
 
-    <!-- الشاشة 3: Captcha (التقويم بدل الكتابة) -->
+    <!-- الشاشة 3: Captcha (التقويم) -->
     <div id="step-captcha" class="container hidden">
         <h2>اختبار التحقق من صاحبة العيد <i class="fa-solid fa-robot" style="color: var(--main-red);"></i></h2>
         <p id="captcha-question">1. اختاري تاريخ ميلادك المميز من التقويم:</p>
@@ -600,9 +600,9 @@
     <!-- الشاشة 6: لوحة الإدارة المحمية بكلمة مرور -->
     <div id="step-admin" class="container hidden">
         <h2 style="color: #ffd700;"><i class="fa-solid fa-shield-halved"></i> لوحة التحكم (aseel)</h2>
-        <p>إدارة الرسائل وإعادة ضبط حالة اللعب:</p>
+        <p>إدارة الرسائل السحابية وإعادة ضبط حالة اللعب:</p>
         <div id="admin-messages-render" class="messages-list" style="margin-bottom: 15px;"></div>
-        <button class="btn" onclick="adminClearAll()" style="background: #a00;"><i class="fa-solid fa-trash-can"></i> حذف كافة الرسائل دفعة واحدة</button>
+        <button class="btn" onclick="adminClearAll()" style="background: #a00;"><i class="fa-solid fa-trash-can"></i> حذف كافة الرسائل دفعة واحدة من السحابة</button>
         <br>
         <button class="btn" onclick="adminResetPlayedStatus()" style="background: #d97706;"><i class="fa-solid fa-rotate-right"></i> تصفير حالة اللعب (إعادة اللعبة كأنها جديدة)</button>
         <br>
@@ -621,6 +621,10 @@
     </div>
 
     <script>
+        // --- رابط قاعدة بيانات Firebase ---
+        const FIREBASE_DB_URL = "https://krkr-42f6d-default-rtdb.firebaseio.com/messages";
+        let cachedCloudMessages = [];
+
         // --- نظام الصوتيات (Web Audio API) ---
         let audioCtx = null;
         let isMusicMuted = false;
@@ -636,7 +640,6 @@
             return audioCtx;
         }
 
-        // صوت النقر
         function playClickSound() {
             try {
                 const ctx = getAudioContext();
@@ -733,10 +736,12 @@
             starsContainer.appendChild(star);
         }
 
-        // 2. التحميل الأولي
+        // 2. التحميل الأولي وجلب الرسائل السحابية
         window.onload = function() {
             checkPlayedStatus();
-            updateMarquee();
+            fetchCloudMessages();
+            // تحديث دوري كل 8 ثوانٍ لضمان وصول الرسائل الجديدة فوراً
+            setInterval(fetchCloudMessages, 8000);
         };
 
         function checkPlayedStatus() {
@@ -767,39 +772,62 @@
         }
         function goToPookie() { showStep('step-pookie'); }
 
-        // 4. استرجاع الرسائل من LocalStorage
-        function getAllMessages() {
-            return JSON.parse(localStorage.getItem('krkr_msgs') || '[]');
+        // 4. دوال التعامل مع Firebase السحابية
+        async function fetchCloudMessages() {
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}.json`);
+                const data = await res.json();
+                cachedCloudMessages = [];
+                if(data) {
+                    for(const key in data) {
+                        cachedCloudMessages.push({ id: key, ...data[key] });
+                    }
+                }
+                updateMarquee();
+            } catch(e) {
+                console.error("Firebase Fetch Error:", e);
+            }
         }
 
-        // 5. حفظ الرسائل وتحديث الشريط
-        function saveMessage() {
+        async function saveMessage() {
             const name = document.getElementById('sender-name').value.trim();
             const msg = document.getElementById('sender-msg').value.trim();
+            const btn = document.getElementById('btn-submit-msg');
             if(!name || !msg) return alert('الرجاء كتابة الاسم والرسالة!');
             
-            let msgs = getAllMessages();
-            msgs.push({name, msg});
-            localStorage.setItem('krkr_msgs', JSON.stringify(msgs));
-            
-            alert('تم إرسال تهنئتك بنجاح!');
-            document.getElementById('sender-name').value = '';
-            document.getElementById('sender-msg').value = '';
-            updateMarquee();
-            goBackHome();
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
+
+            try {
+                await fetch(`${FIREBASE_DB_URL}.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, msg, timestamp: Date.now() })
+                });
+
+                alert('تم إرسال تهنئتك وحفظها في السحابة بنجاح! ✨');
+                document.getElementById('sender-name').value = '';
+                document.getElementById('sender-msg').value = '';
+                await fetchCloudMessages();
+                goBackHome();
+            } catch(err) {
+                alert('حدث خطأ أثناء الإرسال، تأكدي من الاتصال بالإنترنت!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال المعايدة';
+            }
         }
 
-        // 6. تحديث شريط المعايدات السفلي
+        // 5. تحديث شريط المعايدات السفلي
         function updateMarquee() {
-            const allMsgs = getAllMessages();
             const marqueeRender = document.getElementById('marquee-render');
             
-            if(allMsgs.length === 0) {
+            if(cachedCloudMessages.length === 0) {
                 marqueeRender.innerHTML = `<div class="marquee-item"><span>لا توجد معايدات حتّى الآن.. كوني أول من يعايد krkr! ✨</span></div>`;
                 return;
             }
 
-            marqueeRender.innerHTML = allMsgs.map(m => `
+            marqueeRender.innerHTML = cachedCloudMessages.map(m => `
                 <div class="marquee-item">
                     <span class="marquee-name"><i class="fa-solid fa-heart"></i> ${m.name}:</span>
                     <span>${m.msg}</span>
@@ -807,7 +835,7 @@
             `).join('');
         }
 
-        // 7. اختبار التحقق
+        // 6. اختبار التحقق
         let captchaStep = 1;
         function startVerification() {
             captchaStep = 1;
@@ -860,7 +888,6 @@
 
         function checkDate() {
             const val = document.getElementById('date-val').value;
-            // التحقق من تاريخ 12.9.2008 بصيغة التقويم YYYY-MM-DD
             if(val === '2008-09-12') {
                 nextCaptcha();
             } else {
@@ -886,7 +913,7 @@
             }
         }
 
-        // 8. تشغيل اللعبة
+        // 7. تشغيل اللعبة
         let canvas, ctx;
         let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
@@ -997,7 +1024,6 @@
             let cameraX = Math.max(0, cloud.x - 100);
             ctx.translate(-cameraX, 0);
 
-            // الأرضية
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 168, 2500, 32);
             ctx.fillStyle = '#fff';
@@ -1005,7 +1031,6 @@
 
             let breathOffsetY = Math.sin(breathAnim) * 2;
 
-            // رسمة كلاود
             ctx.fillStyle = '#7a8a9e';
             ctx.fillRect(cloud.x - 6, cloud.y + 5 + breathOffsetY, 8, 38);
             ctx.fillStyle = '#b0c4de';
@@ -1033,7 +1058,6 @@
             ctx.lineTo(cloud.x + 28, cloud.y + 10 + breathOffsetY);
             ctx.fill();
 
-            // العقبات (قاصر)
             ctx.font = 'bold 16px Mada';
             obstacles.forEach((obs, index) => {
                 let obsFloat = Math.sin(breathAnim + index) * 2;
@@ -1043,7 +1067,6 @@
                 ctx.fillText('قاصر', obs.x + 10, obs.y + 18 + obsFloat);
             });
 
-            // خط النهاية (+18 بالغ)
             let glow = Math.abs(Math.sin(finishPulse)) * 10;
             ctx.shadowBlur = 15 + glow;
             ctx.shadowColor = '#00ff88';
@@ -1058,27 +1081,27 @@
             ctx.restore();
         }
 
-        // 9. الفوز باللعبة
+        // 8. الفوز باللعبة
         function winGame() {
             localStorage.setItem('krkr_played', 'true');
             confetti({ particleCount: 180, spread: 90, origin: { y: 0.6 } });
             setTimeout(() => { showStep('step-presents'); }, 1000);
         }
 
-        // فتح الصندوق وعرض الرسائل
-        function openGift() {
+        // فتح الصندوق وعرض الرسائل السحابية
+        async function openGift() {
             confetti({ particleCount: 120, spread: 100 });
             document.getElementById('messages-container').classList.remove('hidden');
+            await fetchCloudMessages();
             
-            let allMsgs = getAllMessages();
             const renderBox = document.getElementById('messages-render');
 
-            if(allMsgs.length === 0) {
+            if(cachedCloudMessages.length === 0) {
                 renderBox.innerHTML = `<p style="text-align: center; color: #bbb;">لا توجد رسائل مكتوبة بعد!</p>`;
                 return;
             }
 
-            renderBox.innerHTML = allMsgs.map(m => `
+            renderBox.innerHTML = cachedCloudMessages.map(m => `
                 <div class="message-card">
                     <div class="message-sender"><i class="fa-solid fa-user-tag"></i> ${m.name}</div>
                     <div>${m.msg}</div>
@@ -1086,11 +1109,12 @@
             `).join('');
         }
 
-        // 10. وضع الإدارة السري المحمي بكلمة مرور
-        function accessAdminPanel() {
+        // 9. لوحة الإدارة السحابية المحمية بكلمة مرور
+        async function accessAdminPanel() {
             const pass = prompt('أدخلي رمز الدخول لوضع الإدارة:');
             if(pass === '654654as') {
                 showStep('step-admin');
+                await fetchCloudMessages();
                 renderAdminMessages();
             } else if(pass !== null) {
                 alert('كلمة المرور غير صحيحة!');
@@ -1098,38 +1122,45 @@
         }
 
         function renderAdminMessages() {
-            const allMsgs = getAllMessages();
             const box = document.getElementById('admin-messages-render');
             
-            if(allMsgs.length === 0) {
-                box.innerHTML = `<p style="text-align: center; color: #bbb;">لا توجد أي رسائل مخزنة حالياً.</p>`;
+            if(cachedCloudMessages.length === 0) {
+                box.innerHTML = `<p style="text-align: center; color: #bbb;">لا توجد أي رسائل في السحابة حالياً.</p>`;
                 return;
             }
 
-            box.innerHTML = allMsgs.map((m, index) => `
+            box.innerHTML = cachedCloudMessages.map((m) => `
                 <div class="message-card" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div class="message-sender"><i class="fa-solid fa-user-tag"></i> ${m.name}</div>
                         <div>${m.msg}</div>
                     </div>
-                    <button class="delete-single-btn" onclick="adminDeleteSingle(${index})"><i class="fa-solid fa-trash"></i> حذف</button>
+                    <button class="delete-single-btn" onclick="adminDeleteSingleCloud('${m.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
                 </div>
             `).join('');
         }
 
-        function adminDeleteSingle(index) {
-            let msgs = getAllMessages();
-            msgs.splice(index, 1);
-            localStorage.setItem('krkr_msgs', JSON.stringify(msgs));
-            renderAdminMessages();
-            updateMarquee();
+        async function adminDeleteSingleCloud(id) {
+            if(confirm('هل ترغبين بحذف هذه الرسالة نهائياً من السحابة؟')) {
+                try {
+                    await fetch(`${FIREBASE_DB_URL}/${id}.json`, { method: 'DELETE' });
+                    await fetchCloudMessages();
+                    renderAdminMessages();
+                } catch(e) {
+                    alert('تعذر الحذف، تأكدي من الاتصال.');
+                }
+            }
         }
 
-        function adminClearAll() {
-            if(confirm('هل أنتِ متأكدة من مسح جميع الرسائل بالكامل؟')) {
-                localStorage.removeItem('krkr_msgs');
-                renderAdminMessages();
-                updateMarquee();
+        async function adminClearAll() {
+            if(confirm('تحذير: هل أنتِ متأكدة من مسح جميع الرسائل بالكامل من قاعدة البيانات؟')) {
+                try {
+                    await fetch(`${FIREBASE_DB_URL}.json`, { method: 'DELETE' });
+                    await fetchCloudMessages();
+                    renderAdminMessages();
+                } catch(e) {
+                    alert('تعذر الحذف، تأكدي من الاتصال.');
+                }
             }
         }
 
