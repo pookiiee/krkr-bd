@@ -27,6 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding-bottom: 70px;
         }
 
         body::before {
@@ -337,6 +338,52 @@
             margin-bottom: 4px;
         }
 
+        /* --- شريط المعايدات المتحرك السفلي --- */
+        .marquee-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(30, 0, 5, 0.95);
+            border-top: 2px solid var(--main-red);
+            box-shadow: 0 -4px 15px rgba(255, 42, 75, 0.4);
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 10px 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+
+        .marquee-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 25px;
+            font-size: 1.05rem;
+            color: #fff;
+            background: rgba(255, 42, 75, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 42, 75, 0.4);
+        }
+
+        .marquee-name {
+            color: var(--main-red);
+            font-weight: bold;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -356,16 +403,16 @@
             <button class="btn arrow-btn" onclick="goToPookie()"><i class="fa-solid fa-arrow-left"></i> pookie</button>
             <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
         </div>
-        <!-- زر التخطي يتفعل إذا سبق وفازت بالحساب -->
+        <!-- زر التخطي (ينقل للرسائل مباشرة عند اللعب سابقاً) -->
         <div id="skip-container" class="hidden" style="margin-top: 15px;">
-            <button class="btn skip-btn" onclick="skipDirectly()"><i class="fa-solid fa-forward"></i> تخطي للعبة مباشرة 🚀</button>
+            <button class="btn skip-btn" onclick="skipToPresents()"><i class="fa-solid fa-envelope-open-text"></i> تخطي للرسائل مباشرة 🚀</button>
         </div>
     </div>
 
     <!-- الشاشة 2: pookie -->
     <div id="step-pookie" class="container hidden">
         <h2>أهلاً بأصدقاء صاحبة العيد! <i class="fa-solid fa-envelope-open-text" style="color: var(--main-red);"></i></h2>
-        <p>إذا حاب تعايد krkr، تقدر تكتب مباركتك هنا وستظهر لها في صندوق الهدايا!</p>
+        <p>إذا حاب تعايد krkr، تقدر تكتب مباركتك هنا وستظهر لها في صندوق الهدايا وشريط التهنئة!</p>
         <input type="text" id="sender-name" placeholder="اسمك" class="date-input" style="width: 90%;"><br>
         <textarea id="sender-msg" placeholder="اكتب تهنئتك هنا..." class="date-input" style="width: 90%; height: 80px; resize: none;"></textarea><br>
         <button class="btn" onclick="saveMessage()"><i class="fa-solid fa-paper-plane"></i> إرسال المعايدة</button>
@@ -396,15 +443,24 @@
 
     <!-- الشاشة 5: الهدايا والرسائل -->
     <div id="step-presents" class="container hidden">
-        <h2>مبروك الفوز! <i class="fa-solid fa-star" style="color: #ffd700;"></i></h2>
-        <p>اضغطي على صندوق الهدايا لفتحه!</p>
+        <h2>مرحباً بـ krkr المميزة! <i class="fa-solid fa-star" style="color: #ffd700;"></i></h2>
+        <p>اضغطي على صندوق الهدايا لفتحه ورؤية جميع الرسائل!</p>
         <div class="gift-box-icon" onclick="openGift()">
             <i class="fa-solid fa-box-open"></i>
         </div>
         
         <div id="messages-container" class="messages-list hidden">
-            <h3>رسائل المعايدة من البنات <i class="fa-solid fa-heart" style="color: var(--main-red);"></i>:</h3>
+            <h3>رسائل المعايدة <i class="fa-solid fa-heart" style="color: var(--main-red);"></i>:</h3>
             <div id="messages-render"></div>
+        </div>
+        <br>
+        <button class="btn" onclick="goBackHome()" style="background: #444; margin-top: 15px;"><i class="fa-solid fa-house"></i> العودة للرئيسية</button>
+    </div>
+
+    <!-- شريط الرسائل المتحرك أسفل الشاشة -->
+    <div class="marquee-bar">
+        <div class="marquee-content" id="marquee-render">
+            <!-- تحميل الرسائل تلقائياً -->
         </div>
     </div>
 
@@ -424,16 +480,18 @@
             starsContainer.appendChild(star);
         }
 
-        // 2. التحقق من لعبها سابقاً لإظهار زر التخطي
+        // 2. التحقق عند التحميل
         window.onload = function() {
             if(localStorage.getItem('krkr_played') === 'true') {
                 document.getElementById('skip-container').classList.remove('hidden');
             }
+            updateMarquee();
         };
 
-        function skipDirectly() {
-            showStep('step-game');
-            initGame();
+        // التخطي المباشر إلى شاشة الهدايا والرسائل
+        function skipToPresents() {
+            showStep('step-presents');
+            openGift();
         }
 
         // 3. التنقل
@@ -445,7 +503,13 @@
         function goBackHome() { showStep('step-intro'); }
         function goToPookie() { showStep('step-pookie'); }
 
-        // 4. المعايدات
+        // 4. جلب جميع الرسائل (تم تفريغ المصفوقة الافتراضية)
+        function getAllMessages() {
+            let storedMsgs = JSON.parse(localStorage.getItem('krkr_msgs') || '[]');
+            return storedMsgs;
+        }
+
+        // 5. حفظ المعايدة وتحديث الشريط
         function saveMessage() {
             const name = document.getElementById('sender-name').value;
             const msg = document.getElementById('sender-msg').value;
@@ -458,10 +522,29 @@
             alert('تم إرسال تهنئتك بنجاح!');
             document.getElementById('sender-name').value = '';
             document.getElementById('sender-msg').value = '';
+            updateMarquee();
             goBackHome();
         }
 
-        // 5. Captcha (التاريخ الوهمي 01.01.2000 في المثال)
+        // 6. تحديث الشريط المتحرك في أسفل الصفحة
+        function updateMarquee() {
+            const allMsgs = getAllMessages();
+            const marqueeRender = document.getElementById('marquee-render');
+            
+            if(allMsgs.length === 0) {
+                marqueeRender.innerHTML = `<div class="marquee-item"><span>لا توجد معايدات حتّى الآن.. كن أول من يعايد krkr! ✨</span></div>`;
+                return;
+            }
+
+            marqueeRender.innerHTML = allMsgs.map(m => `
+                <div class="marquee-item">
+                    <span class="marquee-name"><i class="fa-solid fa-heart"></i> ${m.name}:</span>
+                    <span>${m.msg}</span>
+                </div>
+            `).join('');
+        }
+
+        // 7. Captcha
         let captchaStep = 1;
         function startVerification() {
             captchaStep = 1;
@@ -499,10 +582,10 @@
                 qText.innerText = "4. لعبتك المفضلة؟";
                 content.innerHTML = createOptions([
                     { name: 'ماينكرافت', icon: 'fa-cube' },
-                    { name: 'اوفروتش', icon: 'fa-gamepad' },
+                    { name: 'اوفرواتش', icon: 'fa-gamepad' },
                     { name: 'ليقو', icon: 'fa-shapes' },
                     { name: 'توكا بوكا', icon: 'fa-puzzle-piece' }
-                ], 'اوفروتش');
+                ], 'اوفرواتش');
             }
         }
 
@@ -539,7 +622,7 @@
             }
         }
 
-        // 6. اللعبة
+        // 8. اللعبة
         let canvas, ctx;
         let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
@@ -706,9 +789,9 @@
             ctx.restore();
         }
 
-        // 7. حفظ اللعب السابق عند الفوز
+        // 9. الفوز وتخزين حالة الانتهاء
         function winGame() {
-            localStorage.setItem('krkr_played', 'true'); // حفظ حالة الفوز
+            localStorage.setItem('krkr_played', 'true');
             confetti({ particleCount: 180, spread: 90, origin: { y: 0.6 } });
             setTimeout(() => { showStep('step-presents'); }, 1000);
         }
@@ -717,14 +800,14 @@
             confetti({ particleCount: 120, spread: 100 });
             document.getElementById('messages-container').classList.remove('hidden');
             
-            let defaultMsgs = [
-            
-            ];
-
-            let storedMsgs = JSON.parse(localStorage.getItem('krkr_msgs') || '[]');
-            let allMsgs = [...defaultMsgs, ...storedMsgs];
-
+            let allMsgs = getAllMessages();
             const renderBox = document.getElementById('messages-render');
+
+            if(allMsgs.length === 0) {
+                renderBox.innerHTML = `<p style="text-align: center; color: #bbb;">لا توجد رسائل مكتوبة بعد!</p>`;
+                return;
+            }
+
             renderBox.innerHTML = allMsgs.map(m => `
                 <div class="message-card">
                     <div class="message-sender"><i class="fa-solid fa-user-tag"></i> ${m.name}</div>
