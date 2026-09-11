@@ -96,14 +96,16 @@
             background: var(--main-red);
         }
 
+        /* جعل المشغل مرئياً للمتصفح برمجياً لكن مخفي تماماً عن عين المستخدم */
         #youtube-audio-player {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            opacity: 0.001;
             pointer-events: none;
+            z-index: -10;
         }
 
         /* --- رأس كلاود تشيبي بالخلفية --- */
@@ -399,6 +401,7 @@
             margin-bottom: 4px;
         }
 
+        /* --- شريط المعايدات المتحرك --- */
         .marquee-bar {
             position: fixed;
             bottom: 30px;
@@ -736,23 +739,23 @@
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('youtube-audio-player', {
-                height: '1',
-                width: '1',
+                height: '200',
+                width: '200',
                 videoId: 'glRTRNZ7oMg',
                 playerVars: {
                     'autoplay': 1,
                     'controls': 0,
                     'loop': 1,
                     'playlist': 'glRTRNZ7oMg',
-                    'playsinline': 1
+                    'playsinline': 1,
+                    'origin': window.location.origin
                 },
                 events: {
                     'onReady': (e) => {
-                        // محاولة التشغيل الفوري التلقائي
                         try {
-                            e.target.playVideo();
                             e.target.unMute();
-                            e.target.setVolume(70);
+                            e.target.setVolume(80);
+                            e.target.playVideo();
                             isMusicPlaying = true;
                         } catch(err) {}
                     },
@@ -766,10 +769,10 @@
         }
 
         function triggerBgmPlay() {
-            if (ytPlayer && ytPlayer.playVideo && !isMusicPlaying) {
+            if (ytPlayer && ytPlayer.playVideo) {
                 try {
                     ytPlayer.unMute();
-                    ytPlayer.setVolume(70);
+                    ytPlayer.setVolume(80);
                     ytPlayer.playVideo();
                     isMusicPlaying = true;
                     const icon = document.querySelector('#music-btn i');
@@ -821,9 +824,9 @@
             } catch(e) {}
         }
 
-        // تفعيل الصوت مباشرة مع أي تفاعل في حال منعه المتصفح بالبداية
+        // إطلاق الصوت مع أول تفاعل سواء باللابتوب أو الجوال
         window.addEventListener('load', () => {
-            setTimeout(triggerBgmPlay, 800);
+            setTimeout(triggerBgmPlay, 1000);
         });
 
         document.addEventListener('click', (e) => {
@@ -834,6 +837,12 @@
                 triggerBgmPlay();
             }
         }, { passive: true });
+
+        document.addEventListener('keydown', () => {
+            if (!isMusicPlaying) {
+                triggerBgmPlay();
+            }
+        }, { once: true, passive: true });
 
         document.addEventListener('touchstart', () => {
             if (!isMusicPlaying) {
@@ -1298,4 +1307,3 @@
     </script>
 </body>
 </html>
-        
