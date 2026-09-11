@@ -27,7 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 70px;
+            padding-bottom: 110px;
         }
 
         body::before {
@@ -324,6 +324,7 @@
             margin-bottom: 10px;
             border-radius: 6px;
             animation: fadeInMsg 0.5s ease-out forwards;
+            position: relative;
         }
 
         @keyframes fadeInMsg {
@@ -340,9 +341,10 @@
             margin-bottom: 4px;
         }
 
+        /* --- شريط المعايدات المتحرك --- */
         .marquee-bar {
             position: fixed;
-            bottom: 0;
+            bottom: 30px;
             left: 0;
             width: 100%;
             background: rgba(30, 0, 5, 0.95);
@@ -350,7 +352,7 @@
             box-shadow: 0 -4px 15px rgba(255, 42, 75, 0.4);
             overflow: hidden;
             white-space: nowrap;
-            padding: 10px 0;
+            padding: 8px 0;
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -370,7 +372,7 @@
             font-size: 1.05rem;
             color: #fff;
             background: rgba(255, 42, 75, 0.15);
-            padding: 6px 14px;
+            padding: 5px 14px;
             border-radius: 20px;
             border: 1px solid rgba(255, 42, 75, 0.4);
         }
@@ -383,6 +385,51 @@
         @keyframes marquee {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
+        }
+
+        /* --- تذييل الحقوق السفلي والزر السري --- */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: #110003;
+            border-top: 1px solid rgba(255, 42, 75, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #aaa;
+            z-index: 1001;
+            direction: ltr;
+        }
+
+        .admin-star {
+            color: #ffd700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s transform;
+            user-select: none;
+        }
+
+        .admin-star:hover {
+            transform: scale(1.35) rotate(15deg);
+        }
+
+        .delete-single-btn {
+            background: #a00;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: inherit;
+        }
+        .delete-single-btn:hover {
+            background: #f00;
         }
 
         .hidden { display: none !important; }
@@ -405,7 +452,6 @@
             <button class="btn arrow-btn" onclick="startVerification()">birthday girl <i class="fa-solid fa-arrow-right"></i></button>
         </div>
         
-        <!-- زر التخطي الدائم والمباشر للرسائل والهدايا -->
         <div style="margin-top: 20px;">
             <button class="btn skip-btn" onclick="skipToPresents()"><i class="fa-solid fa-gift"></i> تخطي مباشر لصندوق الهدايا 🚀</button>
         </div>
@@ -454,20 +500,34 @@
         <div id="messages-container" class="messages-list hidden">
             <h3>رسائل المعايدة <i class="fa-solid fa-heart" style="color: var(--main-red);"></i>:</h3>
             <div id="messages-render"></div>
-            <!-- زر لمسح الرسائل المخزنة وحذف كلمة احبك القديمة -->
-            <button class="btn" onclick="clearAllMessages()" style="background: #800020; font-size: 0.85rem; padding: 6px 12px; margin-top: 15px;"><i class="fa-solid fa-trash"></i> مسح كافة الرسائل المخزنة</button>
         </div>
         <br>
         <button class="btn" onclick="goBackHome()" style="background: #444; margin-top: 15px;"><i class="fa-solid fa-house"></i> العودة للرئيسية</button>
     </div>
 
-    <!-- شريط الرسائل المتحرك أسفل الشاشة -->
+    <!-- الشاشة 6: لوحة الإدارة المحمية بكلمة مرور -->
+    <div id="step-admin" class="container hidden">
+        <h2 style="color: #ffd700;"><i class="fa-solid fa-shield-halved"></i> لوحة التحكم (aseel)</h2>
+        <p>إدارة الرسائل وحذف الرسائل غير المرغوبة:</p>
+        <div id="admin-messages-render" class="messages-list" style="margin-bottom: 15px;"></div>
+        <button class="btn" onclick="adminClearAll()" style="background: #a00;"><i class="fa-solid fa-trash-can"></i> حذف كافة الرسائل دفعة واحدة</button>
+        <br>
+        <button class="btn" onclick="goBackHome()" style="background: #444; margin-top: 10px;"><i class="fa-solid fa-arrow-right"></i> خروج من لوحة التحكم</button>
+    </div>
+
+    <!-- شريط المعايدات المتحرك -->
     <div class="marquee-bar">
         <div class="marquee-content" id="marquee-render"></div>
     </div>
 
+    <!-- التذييل السفلي وفيه النجمة للتحكم -->
+    <div class="footer-bar">
+        <span>made by aseel</span>
+        <i class="fa-solid fa-star admin-star" title="لوحة الإدارة" onclick="accessAdminPanel()"></i>
+    </div>
+
     <script>
-        // 1. خلفية النجوم
+        // 1. توليد النجوم الخلفية
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 90; i++) {
             const star = document.createElement('div');
@@ -487,14 +547,13 @@
             updateMarquee();
         };
 
-        // تخطي مباشر لكامل المراحل واللعبة إلى الهدايا
         function skipToPresents() {
             if(gameInterval) clearInterval(gameInterval);
             showStep('step-presents');
             openGift();
         }
 
-        // 3. التنقل بين الشاشات
+        // 3. التحكم بالشاشات
         function showStep(id) {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -506,12 +565,12 @@
         }
         function goToPookie() { showStep('step-pookie'); }
 
-        // 4. جلب الرسائل
+        // 4. استرجاع الرسائل من LocalStorage
         function getAllMessages() {
             return JSON.parse(localStorage.getItem('krkr_msgs') || '[]');
         }
 
-        // 5. حفظ المعايدة
+        // 5. حفظ الرسائل وتحديث الشريط
         function saveMessage() {
             const name = document.getElementById('sender-name').value.trim();
             const msg = document.getElementById('sender-msg').value.trim();
@@ -528,16 +587,7 @@
             goBackHome();
         }
 
-        // مسح الرسائل المخزنة
-        function clearAllMessages() {
-            if(confirm('هل أنتِ متأكدة من رغبتك في حذف كل الرسائل؟')) {
-                localStorage.removeItem('krkr_msgs');
-                openGift();
-                updateMarquee();
-            }
-        }
-
-        // 6. تحديث الشريط المتحرك
+        // 6. تحديث شريط المعايدات السفلي
         function updateMarquee() {
             const allMsgs = getAllMessages();
             const marqueeRender = document.getElementById('marquee-render');
@@ -555,7 +605,7 @@
             `).join('');
         }
 
-        // 7. Captcha
+        // 7. اختبار التحقق
         let captchaStep = 1;
         function startVerification() {
             captchaStep = 1;
@@ -633,7 +683,7 @@
             }
         }
 
-        // 8. اللعبة
+        // 8. تشغيل اللعبة
         let canvas, ctx;
         let cloud = { x: 30, y: 120, w: 32, h: 48, dy: 0, grounded: true };
         let obstacles = [];
@@ -806,7 +856,7 @@
             setTimeout(() => { showStep('step-presents'); }, 1000);
         }
 
-        // فتح الصندوق وعرض الرسائل
+        // فتح الصندوق وعرض الرسائل (للمستخدم العادي بدون أزرار مسح)
         function openGift() {
             confetti({ particleCount: 120, spread: 100 });
             document.getElementById('messages-container').classList.remove('hidden');
@@ -825,6 +875,53 @@
                     <div>${m.msg}</div>
                 </div>
             `).join('');
+        }
+
+        // 10. وضع الإدارة السري المحمي بكلمة مرور
+        function accessAdminPanel() {
+            const pass = prompt('أدخلي رمز الدخول لوضع الإدارة:');
+            if(pass === '654654as') {
+                showStep('step-admin');
+                renderAdminMessages();
+            } else if(pass !== null) {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function renderAdminMessages() {
+            const allMsgs = getAllMessages();
+            const box = document.getElementById('admin-messages-render');
+            
+            if(allMsgs.length === 0) {
+                box.innerHTML = `<p style="text-align: center; color: #bbb;">لا توجد أي رسائل مخزنة حالياً.</p>`;
+                return;
+            }
+
+            box.innerHTML = allMsgs.map((m, index) => `
+                <div class="message-card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="message-sender"><i class="fa-solid fa-user-tag"></i> ${m.name}</div>
+                        <div>${m.msg}</div>
+                    </div>
+                    <button class="delete-single-btn" onclick="adminDeleteSingle(${index})"><i class="fa-solid fa-trash"></i> حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function adminDeleteSingle(index) {
+            let msgs = getAllMessages();
+            msgs.splice(index, 1);
+            localStorage.setItem('krkr_msgs', JSON.stringify(msgs));
+            renderAdminMessages();
+            updateMarquee();
+        }
+
+        function adminClearAll() {
+            if(confirm('هل أنتِ متأكدة من مسح جميع الرسائل بالكامل؟')) {
+                localStorage.removeItem('krkr_msgs');
+                renderAdminMessages();
+                updateMarquee();
+            }
         }
     </script>
 </body>
