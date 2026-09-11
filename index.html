@@ -602,7 +602,37 @@
             starsContainer.appendChild(star);
         }
 
-        // 2. التحميل الأولي
+        // 2. تجهيز صورة كلاود سترايف الرسمية مع إزالة الخلفية البيضاء تلقائياً
+        const cloudImg = new Image();
+        cloudImg.crossOrigin = "anonymous";
+        let cloudSpriteCanvas = null;
+        let isCloudImgReady = false;
+
+        cloudImg.src = "https://images.wikia.com/finalfantasy/images/c/c9/Cloud-FFVIIArt.png";
+        cloudImg.onload = function() {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = cloudImg.naturalWidth;
+            offCanvas.height = cloudImg.naturalHeight;
+            const offCtx = offCanvas.getContext('2d');
+            offCtx.drawImage(cloudImg, 0, 0);
+
+            try {
+                const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+                const d = imgData.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    // جعل اللون الأبيض شفافاً
+                    if (d[i] > 240 && d[i+1] > 240 && d[i+2] > 240) {
+                        d[i+3] = 0;
+                    }
+                }
+                offCtx.putImageData(imgData, 0, 0);
+            } catch(e) {}
+
+            cloudSpriteCanvas = offCanvas;
+            isCloudImgReady = true;
+        };
+
+        // التحميل الأولي
         window.onload = function() {
             checkPlayedStatus();
             updateMarquee();
@@ -756,7 +786,7 @@
 
         // 8. تشغيل اللعبة
         let canvas, ctx;
-        let cloud = { x: 30, y: 112, w: 42, h: 56, dy: 0, grounded: true, runAnim: 0 };
+        let cloud = { x: 30, y: 92, w: 50, h: 76, dy: 0, grounded: true, runAngle: 0 };
         let obstacles = [];
         let finishLine = { x: 1450, reached: false };
         let keys = { left: false, right: false };
@@ -775,8 +805,8 @@
                 { x: 1250, y: 140, w: 55, h: 25, speed: 2.5 }
             ];
             cloud.x = 30;
-            cloud.y = 112;
-            cloud.runAnim = 0;
+            cloud.y = 92;
+            cloud.runAngle = 0;
             finishLine.x = 1450;
             finishLine.reached = false;
 
@@ -822,34 +852,39 @@
 
         function jumpCharacter() {
             if(cloud.grounded) {
-                cloud.dy = -10.5;
+                cloud.dy = -11;
                 cloud.grounded = false;
             }
         }
 
         function updateGame() {
-            breathAnim += 0.1;
+            breathAnim += 0.08;
             finishPulse += 0.08;
 
             let isRunning = false;
             if(keys.right) { cloud.x += 4.5; isRunning = true; }
             if(keys.left && cloud.x > 10) { cloud.x -= 4.5; isRunning = true; }
 
-            if(isRunning) { cloud.runAnim += 0.35; } else { cloud.runAnim = 0; }
+            if(isRunning) { cloud.runAngle += 0.3; } else { cloud.runAngle = 0; }
 
             cloud.y += cloud.dy;
             cloud.dy += 0.55;
 
-            if(cloud.y >= 112) {
-                cloud.y = 112;
+            if(cloud.y >= 92) {
+                cloud.y = 92;
                 cloud.dy = 0;
                 cloud.grounded = true;
             }
 
             obstacles.forEach(obs => {
                 obs.x -= obs.speed;
-                if(cloud.x < obs.x + obs.w && cloud.x + cloud.w > obs.x &&
-                   cloud.y < obs.y + obs.h && cloud.y + cloud.h > obs.y) {
+                // فحص الاصطدام
+                let hitboxW = 34;
+                let hitboxH = 68;
+                let hitboxX = cloud.x + 10;
+                let hitboxY = cloud.y + 8;
+                if(hitboxX < obs.x + obs.w && hitboxX + hitboxW > obs.x &&
+                   hitboxY < obs.y + obs.h && hitboxY + hitboxH > obs.y) {
                     cloud.x = Math.max(10, cloud.x - 50);
                 }
             });
@@ -863,100 +898,6 @@
             drawGame();
         }
 
-        function drawCloudCharacter(x, y, breath) {
-            let cx = x + 15;
-            let cy = y + breath;
-            let legSwing = Math.sin(cloud.runAnim) * 7;
-
-            // 1. سيف باستر العملاق في الظهر (Buster Sword)
-            ctx.save();
-            ctx.translate(cx - 3, cy + 22);
-            ctx.rotate(-0.35);
-            // المقبض البني والواقي الذهبي
-            ctx.fillStyle = '#8b2500';
-            ctx.fillRect(-3, -22, 6, 14);
-            ctx.fillStyle = '#d4af37';
-            ctx.fillRect(-8, -8, 16, 4);
-            // نصل السيف العريض الحديدي
-            ctx.fillStyle = '#9eabb8';
-            ctx.fillRect(-8, -4, 16, 40);
-            ctx.fillStyle = '#cfd9e0'; // الحافة الحادة
-            ctx.fillRect(4, -4, 4, 40);
-            // فتحتا الماتيريا الأيقونية (Materia Slots)
-            ctx.fillStyle = '#00f7ff';
-            ctx.beginPath(); ctx.arc(-1, 8, 2.2, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#ff0055';
-            ctx.beginPath(); ctx.arc(-1, 16, 2.2, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-
-            // 2. الأرجل وبنطال الجندي والأحذية
-            ctx.fillStyle = '#1c2130';
-            if(!cloud.grounded) {
-                ctx.fillRect(cx - 6, cy + 38, 8, 14);
-                ctx.fillRect(cx + 4, cy + 34, 8, 14);
-            } else {
-                ctx.fillRect(cx - 6 - legSwing, cy + 38, 8, 16);
-                ctx.fillRect(cx + 4 + legSwing, cy + 38, 8, 16);
-            }
-            // أحذية كلاود مع البكلات
-            ctx.fillStyle = '#3c2417';
-            ctx.fillRect(cx - 7 - legSwing, cy + 50, 9, 6);
-            ctx.fillRect(cx + 3 + legSwing, cy + 50, 9, 6);
-
-            // 3. سترة الجندي (SOLDIER Navy Vest) وحزام الكتف
-            ctx.fillStyle = '#222838';
-            ctx.fillRect(cx - 4, cy + 22, 18, 18);
-            ctx.fillStyle = '#4a3325';
-            ctx.fillRect(cx - 3, cy + 24, 4, 14); // الحزام الجلدي المائل
-
-            // 4. درع الكتف الحديدي مع البراغي (Pauldrons)
-            ctx.fillStyle = '#7a8794';
-            ctx.fillRect(cx - 9, cy + 22, 7, 9);
-            ctx.fillStyle = '#cfd9e0';
-            ctx.fillRect(cx - 8, cy + 23, 2, 2);
-
-            // 5. الوجه والعنق
-            ctx.fillStyle = '#ffd6ba';
-            ctx.fillRect(cx + 1, cy + 18, 8, 5); // عنق
-            ctx.fillRect(cx - 2, cy + 6, 18, 14); // الوجه
-
-            // عيون ماكو المشعة (Mako Eyes)
-            ctx.fillStyle = '#00f0ff';
-            ctx.shadowBlur = 4;
-            ctx.shadowColor = '#00f0ff';
-            ctx.fillRect(cx + 8, cy + 10, 4, 4);
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(cx + 9, cy + 10, 1.5, 1.5);
-
-            // 6. شعر كلاود الذهبي الشائك الحاد (Spiky Blond Hair)
-            ctx.fillStyle = '#ffd624';
-            ctx.beginPath();
-            ctx.moveTo(cx - 6, cy + 8);
-            ctx.lineTo(cx - 14, cy - 2);   // خصلة يسار خلفية
-            ctx.lineTo(cx - 4, cy + 2);
-            ctx.lineTo(cx - 8, cy - 12);  // خصلة يسار عليا
-            ctx.lineTo(cx + 3, cy - 4);
-            ctx.lineTo(cx + 6, cy - 18);  // الشوكة الرئيسية للأعلى
-            ctx.lineTo(cx + 12, cy - 6);
-            ctx.lineTo(cx + 18, cy - 15); // خصلة يمين عليا
-            ctx.lineTo(cx + 17, cy);
-            ctx.lineTo(cx + 25, cy - 4);  // خصلة أمامية حادة
-            ctx.lineTo(cx + 17, cy + 6);
-            ctx.lineTo(cx + 15, cy + 12);
-            ctx.lineTo(cx - 4, cy + 12);
-            ctx.closePath();
-            ctx.fill();
-
-            // خصلات إضاءة شقراء فاتحة إضافية
-            ctx.fillStyle = '#fff575';
-            ctx.beginPath();
-            ctx.moveTo(cx + 4, cy - 14);
-            ctx.lineTo(cx + 6, cy - 18);
-            ctx.lineTo(cx + 8, cy - 10);
-            ctx.fill();
-        }
-
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -964,16 +905,33 @@
             let cameraX = Math.max(0, cloud.x - 100);
             ctx.translate(-cameraX, 0);
 
-            // الأرضية مع خطوط الشارع
+            // خطوط الشارع
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 168, 2500, 32);
             ctx.fillStyle = '#fff';
             for(let i=0; i<2500; i+=60) { ctx.fillRect(i, 182, 30, 4); }
 
             let breathOffsetY = Math.sin(breathAnim) * 1.5;
+            let runTilt = Math.sin(cloud.runAngle) * 0.08;
 
-            // رسم كلاود سترايف المحسن بالتفاصيل
-            drawCloudCharacter(cloud.x, cloud.y, breathOffsetY);
+            // رسم كلاود سترايف باستخدام الصورة الأصلية
+            ctx.save();
+            let drawW = 66;
+            let drawH = 78;
+            let drawX = cloud.x;
+            let drawY = cloud.y + breathOffsetY;
+
+            ctx.translate(drawX + drawW/2, drawY + drawH);
+            ctx.rotate(runTilt);
+
+            if (isCloudImgReady && cloudSpriteCanvas) {
+                ctx.drawImage(cloudSpriteCanvas, -drawW/2, -drawH, drawW, drawH);
+            } else {
+                // احتياط حتى تنتهي الصورة من التحميل
+                ctx.fillStyle = '#ffe234';
+                ctx.fillRect(-15, -drawH, 30, drawH);
+            }
+            ctx.restore();
 
             // العقبات (قاصر)
             ctx.font = 'bold 16px Mada';
