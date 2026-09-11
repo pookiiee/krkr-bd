@@ -71,6 +71,31 @@
             100% { opacity: 1; transform: scale(1.6) translateY(0); box-shadow: 0 0 14px #ff4d6d; }
         }
 
+        /* --- زر التحكم بالموسيقى --- */
+        .music-toggle-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 42, 75, 0.2);
+            border: 1px solid var(--main-red);
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1002;
+            box-shadow: 0 0 10px rgba(255, 42, 75, 0.4);
+            transition: 0.3s;
+        }
+
+        .music-toggle-btn:hover {
+            transform: scale(1.1);
+            background: var(--main-red);
+        }
+
         /* --- رأس كلاود تشيبي بالخلفية --- */
         .chibi-cloud-bg {
             position: fixed;
@@ -262,7 +287,7 @@
             font-size: 1.1rem;
             border-radius: 10px;
             border: 1px solid var(--main-red);
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             color: #fff;
             text-align: center;
             width: 80%;
@@ -270,6 +295,7 @@
             outline: none;
             font-family: inherit;
             transition: 0.3s;
+            color-scheme: dark;
         }
 
         .date-input:focus {
@@ -467,6 +493,11 @@
 
     <div id="stars-container"></div>
 
+    <!-- زر التحكم بتشغيل/إيقاف الموسيقى -->
+    <div class="music-toggle-btn" id="music-btn" onclick="toggleBGM()" title="الموسيقى">
+        <i class="fa-solid fa-music"></i>
+    </div>
+
     <!-- رأس كلاود سترايف (تشيبي) بالخلفية -->
     <div class="chibi-cloud-bg" title="Cloud Strife">
         <svg viewBox="0 0 100 100" width="100%" height="100%">
@@ -529,10 +560,10 @@
         <button class="btn" onclick="goBackHome()" style="background: #444;"><i class="fa-solid fa-house"></i> العودة للرئيسية</button>
     </div>
 
-    <!-- الشاشة 3: Captcha -->
+    <!-- الشاشة 3: Captcha (التقويم بدل الكتابة) -->
     <div id="step-captcha" class="container hidden">
         <h2>اختبار التحقق من صاحبة العيد <i class="fa-solid fa-robot" style="color: var(--main-red);"></i></h2>
-        <p id="captcha-question">1. أدخلي تاريخ ميلادك المميز:</p>
+        <p id="captcha-question">1. اختاري تاريخ ميلادك المميز من التقويم:</p>
         <div id="captcha-content"></div>
     </div>
 
@@ -590,6 +621,103 @@
     </div>
 
     <script>
+        // --- نظام الصوتيات (Web Audio API) ---
+        let audioCtx = null;
+        let isMusicMuted = false;
+        let bgmTimeout = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // صوت النقر
+        function playClickSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.05);
+
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.05);
+            } catch(e) {}
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button, .btn, .option-btn, .control-btn, .gift-box-icon, .admin-star, .music-toggle-btn')) {
+                playClickSound();
+            }
+            if (!bgmTimeout && !isMusicMuted) {
+                playHappyBirthdayLoop();
+            }
+        });
+
+        // نغمة ميلاد بالخلفية
+        const birthdayNotes = [
+            { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 }, { f: 261.63, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 329.63, d: 0.8 },
+            { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 }, { f: 261.63, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 349.23, d: 0.8 },
+            { f: 261.63, d: 0.35 }, { f: 261.63, d: 0.25 }, { f: 523.25, d: 0.5 }, { f: 440.00, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 329.63, d: 0.5 }, { f: 293.66, d: 0.6 },
+            { f: 466.16, d: 0.35 }, { f: 466.16, d: 0.25 }, { f: 440.00, d: 0.5 }, { f: 349.23, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 349.23, d: 1.0 }
+        ];
+
+        function playHappyBirthdayLoop() {
+            if (isMusicMuted) return;
+            const ctx = getAudioContext();
+            let currentTime = ctx.currentTime + 0.1;
+
+            birthdayNotes.forEach(n => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(n.f, currentTime);
+
+                gain.gain.setValueAtTime(0.045, currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, currentTime + n.d - 0.05);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(currentTime);
+                osc.stop(currentTime + n.d);
+
+                currentTime += n.d + 0.05;
+            });
+
+            const totalDuration = (currentTime - ctx.currentTime) * 1000;
+            bgmTimeout = setTimeout(() => {
+                if (!isMusicMuted) playHappyBirthdayLoop();
+            }, totalDuration + 800);
+        }
+
+        function toggleBGM() {
+            isMusicMuted = !isMusicMuted;
+            const icon = document.querySelector('#music-btn i');
+            if (isMusicMuted) {
+                if (bgmTimeout) clearTimeout(bgmTimeout);
+                bgmTimeout = null;
+                icon.className = 'fa-solid fa-volume-xmark';
+            } else {
+                icon.className = 'fa-solid fa-music';
+                playHappyBirthdayLoop();
+            }
+        }
+
         // 1. توليد النجوم الخلفية
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 90; i++) {
@@ -692,9 +820,9 @@
             const qText = document.getElementById('captcha-question');
             
             if(captchaStep === 1) {
-                qText.innerText = "1. أدخلي تاريخ ميلادك (مثال: 01.01.2000):";
+                qText.innerText = "1. اختاري تاريخ ميلادك المميز من التقويم:";
                 content.innerHTML = `
-                    <input type="text" id="date-val" class="date-input" placeholder="01.01.2000"><br>
+                    <input type="date" id="date-val" class="date-input" value="2008-01-01"><br>
                     <button class="btn" onclick="checkDate()"><i class="fa-solid fa-check"></i> تأكيد</button>
                 `;
             } else if(captchaStep === 2) {
@@ -731,11 +859,12 @@
         }
 
         function checkDate() {
-            const val = document.getElementById('date-val').value.trim();
-            if(val === '12.9.2008') {
+            const val = document.getElementById('date-val').value;
+            // التحقق من تاريخ 12.9.2008 بصيغة التقويم YYYY-MM-DD
+            if(val === '2008-09-12') {
                 nextCaptcha();
             } else {
-                alert('التاريخ غير صحيح!');
+                alert('التاريخ غير صحيح! تأكدي من اختيار تاريخ ميلادك الحقيقي');
             }
         }
 
